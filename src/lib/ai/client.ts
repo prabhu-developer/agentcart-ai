@@ -13,4 +13,4 @@ export function getGeminiClient() {
     return client;
 }
 
-export const GEMINI_MODEL = env.GEMINI_MODEL;
+export const GEMINI_MODEL: string = env.GEMINI_MODEL!;
