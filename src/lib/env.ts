@@ -3,8 +3,8 @@ import { z } from "zod";
 const serverEnvSchema = z.object({
     MONGODB_URI: z.string().min(1),
 
-    OPENAI_API_KEY: z.string().optional(),
-    OPENAI_MODEL: z.string().optional(),
+    GEMINI_API_KEY: z.string().optional(),
+    GEMINI_MODEL: z.string().optional(),
 
     PAYPAL_BASE_URL: z
         .string()
@@ -18,8 +18,8 @@ const serverEnvSchema = z.object({
 export const env = serverEnvSchema.parse({
     MONGODB_URI: process.env.MONGODB_URI,
 
-    OPENAI_API_KEY: process.env.OPENAI_API_KEY || undefined,
-    OPENAI_MODEL: process.env.OPENAI_MODEL || undefined,
+    GEMINI_API_KEY: process.env.GEMINI_API_KEY || undefined,
+    GEMINI_MODEL: process.env.GEMINI_MODEL || undefined,
 
     PAYPAL_BASE_URL:
         process.env.PAYPAL_BASE_URL || undefined,
