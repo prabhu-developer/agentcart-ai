@@ -42,9 +42,12 @@ export interface ChatMessage {
   sender: "user" | "assistant";
   timestamp: string;
   text: string;
+  type?: "recommendation" | "clarification" | "message" | "error";
   recommendedProducts?: Product[];
   comparisonProducts?: Product[];
   budgetAnalysis?: BudgetAnalysis;
+  clarificationOptions?: string[];
+  suggestedQueries?: string[];
 }
 
 export interface ShoppingSession {

@@ -13,6 +13,7 @@ import {
   ArrowRight,
   Database,
   MessageSquare,
+  Bot,
 } from "lucide-react";
 import { ChatMessage, Product } from "../types";
 import {
@@ -28,7 +29,7 @@ import { ProductComparisonModal } from "./product-comparison-modal";
 import { CartDrawer } from "./cart-drawer";
 import { Button } from "@/components/ui/button";
 import { CatalogBrowser } from "@/features/products/components/catalog-browser";
-import { fetchProductsFromAPI } from "@/features/products/services/product-client";
+import { sendShoppingInquiry } from "@/features/agent/services/shopping-client";
 
 let messageSeq = 0;
 function createMessageId(prefix: string): string {
@@ -73,61 +74,55 @@ export function ShoppingWorkspace() {
     }
   }, [messages, isTyping, activeView]);
 
-  // Query real database products and build an assistant recommendation
-  const generateDatabaseRecommendation = useCallback(
-    async (queryText: string): Promise<{
+  // Request recommendations from our AI Shopping Agent (POST /api/ai/shopping)
+  const queryAiShoppingAgent = useCallback(
+    async (
+      queryText: string,
+      historyMessages: ChatMessage[] = []
+    ): Promise<{
       text: string;
-      products: Product[];
-      comparison: Product[];
-      budget: {
-        total: number;
-        budget: number;
-        status: "under_budget" | "within_budget";
-        difference: number;
-        breakdown: { label: string; amount: number }[];
-      };
+      type: "recommendation" | "clarification" | "message" | "error";
+      products?: Product[];
+      comparison?: Product[];
+      budget?: ChatMessage["budgetAnalysis"];
+      clarificationOptions?: string[];
+      suggestedQueries?: string[];
     }> => {
       try {
-        // Search real MongoDB catalog
-        const res = await fetchProductsFromAPI({
-          search: queryText.trim(),
-          limit: 5,
+        const historyPayload = historyMessages.map((m) => ({
+          role: (m.sender === "user" ? "user" : "assistant") as "user" | "assistant",
+          content: m.text,
+        }));
+
+        const result = await sendShoppingInquiry({
+          message: queryText.trim(),
+          history: historyPayload,
+          sessionId: activeSessionId,
         });
 
-        if (res.success && res.data.length > 0) {
-          const dbProducts = res.data;
-          const totalCost = Number(
-            dbProducts.reduce((acc, p) => acc + p.price, 0).toFixed(2)
-          );
-          const targetBudget = totalCost > 500 ? 1000 : 500;
-
-          return {
-            text: `I queried our real MongoDB catalog and matched ${dbProducts.length} verified products for "${queryText}". Live pricing and inventory have been confirmed.`,
-            products: dbProducts,
-            comparison: dbProducts.slice(0, 2),
-            budget: {
-              total: totalCost,
-              budget: targetBudget,
-              status: totalCost <= targetBudget ? "under_budget" : "within_budget",
-              difference: Number((targetBudget - totalCost).toFixed(2)),
-              breakdown: dbProducts.map((p) => ({ label: p.name, amount: p.price })),
-            },
-          };
-        }
-      } catch {
-        // Fallback to verified local setup if network/DB is temporarily unavailable
+        return {
+          text: result.message,
+          type: result.type,
+          products: result.recommendedProducts,
+          comparison: result.comparisonProducts,
+          budget: result.budgetAnalysis,
+          clarificationOptions: result.clarificationOptions,
+          suggestedQueries: result.suggestedQueries,
+        };
+      } catch (err: unknown) {
+        console.warn("AI shopping agent call failed, using graceful fallback:", err);
+        // Fallback to local verified bundle
+        const fallback = getMockResponseForPrompt(queryText);
+        return {
+          text: fallback.text,
+          type: "recommendation",
+          products: fallback.products,
+          comparison: fallback.comparison,
+          budget: fallback.budget,
+        };
       }
-
-      // Default fallback
-      const fallback = getMockResponseForPrompt(queryText);
-      return {
-        text: fallback.text,
-        products: fallback.products,
-        comparison: fallback.comparison,
-        budget: fallback.budget,
-      };
     },
-    []
+    [activeSessionId]
   );
 
   // Initialize session on mount
@@ -135,6 +130,7 @@ export function ShoppingWorkspace() {
     let isCancelled = false;
 
     async function initMessages() {
+      setIsTyping(true);
       if (initialQuery) {
         setSessionTitle(initialQuery);
         const userMsg: ChatMessage = {
@@ -144,7 +140,7 @@ export function ShoppingWorkspace() {
           text: initialQuery,
         };
 
-        const rec = await generateDatabaseRecommendation(initialQuery);
+        const rec = await queryAiShoppingAgent(initialQuery);
         if (isCancelled) return;
 
         const assistMsg: ChatMessage = {
@@ -152,15 +148,21 @@ export function ShoppingWorkspace() {
           sender: "assistant",
           timestamp: "Just now",
           text: rec.text,
+          type: rec.type,
           recommendedProducts: rec.products,
           comparisonProducts: rec.comparison,
           budgetAnalysis: rec.budget,
+          clarificationOptions: rec.clarificationOptions,
+          suggestedQueries: rec.suggestedQueries,
         };
 
         setMessages([userMsg, assistMsg]);
       } else {
-        // Load default setup
-        const rec = await generateDatabaseRecommendation("Home office setup");
+        // Load initial home office setup
+        const defaultPrompt =
+          "I need a complete home office setup under $1,000. I need a monitor, keyboard, mouse and ergonomic chair. Prioritize quality, reliability and value for money.";
+
+        const rec = await queryAiShoppingAgent(defaultPrompt);
         if (isCancelled) return;
 
         setMessages([
@@ -168,19 +170,23 @@ export function ShoppingWorkspace() {
             id: createMessageId("default-user"),
             sender: "user",
             timestamp: "10:32 AM",
-            text: "I need a complete home office setup under $1,000. I need a monitor, keyboard, mouse and ergonomic chair. Prioritize quality, reliability and value for money.",
+            text: defaultPrompt,
           },
           {
             id: createMessageId("default-assist"),
             sender: "assistant",
             timestamp: "10:32 AM",
             text: rec.text,
+            type: rec.type,
             recommendedProducts: rec.products,
             comparisonProducts: rec.comparison,
             budgetAnalysis: rec.budget,
+            clarificationOptions: rec.clarificationOptions,
+            suggestedQueries: rec.suggestedQueries,
           },
         ]);
       }
+      setIsTyping(false);
     }
 
     initMessages();
@@ -188,7 +194,7 @@ export function ShoppingWorkspace() {
     return () => {
       isCancelled = true;
     };
-  }, [initialQuery, generateDatabaseRecommendation]);
+  }, [initialQuery, queryAiShoppingAgent]);
 
   const handleSendMessage = async (text: string) => {
     setActiveView("chat");
@@ -199,25 +205,39 @@ export function ShoppingWorkspace() {
       text,
     };
 
-    setMessages((prev) => [...prev, userMsg]);
+    const updatedHistory = [...messages, userMsg];
+    setMessages(updatedHistory);
     setIsTyping(true);
 
-    const rec = await generateDatabaseRecommendation(text);
+    try {
+      const rec = await queryAiShoppingAgent(text, updatedHistory);
 
-    setTimeout(() => {
       const assistantMsg: ChatMessage = {
         id: createMessageId("assist"),
         sender: "assistant",
         timestamp: "Just now",
         text: rec.text,
+        type: rec.type,
         recommendedProducts: rec.products,
         comparisonProducts: rec.comparison,
         budgetAnalysis: rec.budget,
+        clarificationOptions: rec.clarificationOptions,
+        suggestedQueries: rec.suggestedQueries,
       };
 
       setMessages((prev) => [...prev, assistantMsg]);
+    } catch {
+      const errorMsg: ChatMessage = {
+        id: createMessageId("assist-error"),
+        sender: "assistant",
+        timestamp: "Just now",
+        text: "I encountered a problem contacting the AI shopping service. Please try again or rephrase your request.",
+        type: "error",
+      };
+      setMessages((prev) => [...prev, errorMsg]);
+    } finally {
       setIsTyping(false);
-    }, 450);
+    }
   };
 
   const handleSelectSession = (sessionId: string) => {
@@ -228,7 +248,8 @@ export function ShoppingWorkspace() {
     const found = MOCK_RECENT_SESSIONS.find((s) => s.id === sessionId);
     if (found && found.initialPrompt) {
       setSessionTitle(found.title);
-      generateDatabaseRecommendation(found.initialPrompt).then((rec) => {
+      setIsTyping(true);
+      queryAiShoppingAgent(found.initialPrompt).then((rec) => {
         setMessages([
           {
             id: createMessageId("session-user"),
@@ -241,11 +262,15 @@ export function ShoppingWorkspace() {
             sender: "assistant",
             timestamp: found.updatedAt,
             text: rec.text,
+            type: rec.type,
             recommendedProducts: rec.products,
             comparisonProducts: rec.comparison,
             budgetAnalysis: rec.budget,
+            clarificationOptions: rec.clarificationOptions,
+            suggestedQueries: rec.suggestedQueries,
           },
         ]);
+        setIsTyping(false);
       });
     }
   };
@@ -328,12 +353,12 @@ export function ShoppingWorkspace() {
                 </h1>
                 <span className="hidden items-center gap-1 rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-semibold text-emerald-700 sm:inline-flex">
                   <span className="size-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                  MongoDB Connected
+                  AI Agent Connected
                 </span>
               </div>
               <p className="hidden text-[11px] text-[#727b76] sm:block">
                 {activeView === "chat"
-                  ? "AI Shopping Assistant · Real-time DB Queries"
+                  ? "OpenRouter LLM · Real-time Catalog Queries & Budget Optimization"
                   : "Explore 24 Products · Search, Filters, and Sorting"}
               </p>
             </div>
@@ -352,7 +377,7 @@ export function ShoppingWorkspace() {
                 }`}
               >
                 <MessageSquare className="size-3.5" />
-                <span>Assistant</span>
+                <span>AI Assistant</span>
               </button>
 
               <button
@@ -409,16 +434,16 @@ export function ShoppingWorkspace() {
           </div>
         </div>
 
-        {/* Phase 02 Real Catalog Notice Strip */}
+        {/* Phase 03 AI Shopping Notice Strip */}
         <div className="flex items-center justify-between border-b border-[#e8ece9] bg-[#f8faf9] px-4 py-1.5 text-[11px] text-[#727b76]">
           <div className="flex items-center gap-1.5">
-            <ShieldCheck className="size-3.5 text-[#0f766e]" />
+            <Bot className="size-3.5 text-[#0f766e]" />
             <span>
-              Phase 02 Live Backend: Products loaded from MongoDB with server-side inventory and pricing.
+              Phase 03 AI Shopping Agent: OpenRouter LLM with controlled MongoDB tools and minor-unit budget verification.
             </span>
           </div>
           <span className="hidden text-[10px] text-[#0f766e] font-medium md:inline">
-            REST API v1 Active
+            5 Backend Tools Active
           </span>
         </div>
 
@@ -445,7 +470,7 @@ export function ShoppingWorkspace() {
                       Let&apos;s find exactly what you need.
                     </h2>
                     <p className="mt-2 max-w-md text-sm leading-relaxed text-[#727b76]">
-                      Tell me what you&apos;re shopping for, your budget, and what matters most. Recommendations are directly matched from our live MongoDB product catalog.
+                      Tell me what you&apos;re shopping for, your budget, and what matters most. Our AI assistant checks live inventory, calculates budgets, and matches real MongoDB products.
                     </p>
 
                     <div className="mt-8 w-full max-w-xl">
@@ -471,7 +496,11 @@ export function ShoppingWorkspace() {
                   /* Messages stream */
                   <div className="space-y-2">
                     {messages.map((message) => (
-                      <ChatMessageItem key={message.id} message={message} />
+                      <ChatMessageItem
+                        key={message.id}
+                        message={message}
+                        onSelectPrompt={handleSendMessage}
+                      />
                     ))}
 
                     {/* Assistant Typing Indicator */}
@@ -483,9 +512,9 @@ export function ShoppingWorkspace() {
                         <div className="rounded-2xl border border-[#e8ece9] bg-white px-4 py-3 text-xs text-[#727b76] shadow-xs">
                           <div className="flex items-center gap-2">
                             <span className="font-semibold text-[#202522]">
-                              AgentCart Assistant
+                              AgentCart AI Assistant
                             </span>
-                            <span>is searching MongoDB catalog and optimizing budget...</span>
+                            <span>is evaluating catalog tools and verifying live inventory...</span>
                           </div>
                           <div className="mt-2 flex gap-1">
                             <span className="size-1.5 rounded-full bg-[#0f766e] animate-bounce" />
