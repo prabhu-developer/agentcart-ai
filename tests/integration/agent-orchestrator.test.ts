@@ -1,9 +1,13 @@
-import { describe, it } from "node:test";
+import { describe, it, after } from "node:test";
 import assert from "node:assert/strict";
+import mongoose from "mongoose";
 import { runShoppingAgent } from "../../src/features/agent/services/shopping-agent";
 import { connectDB } from "../../src/lib/db/connect";
 
 describe("Shopping Agent Orchestrator", () => {
+  after(async () => {
+    await mongoose.disconnect();
+  });
   it("returns clarification options for vague greeting without invoking LLM tools", async () => {
     await connectDB();
     const response = await runShoppingAgent({

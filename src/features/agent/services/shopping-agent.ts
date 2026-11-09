@@ -1,5 +1,4 @@
 import { connectDB } from "@/lib/db/connect";
-import { Product as ProductModel } from "@/models/product";
 import {
   AgentRequest,
   AgentResponse,
@@ -13,13 +12,11 @@ import {
 import {
   callOpenRouterAgent,
   OpenRouterMessage,
-  OpenRouterToolCall,
 } from "@/lib/ai/client";
 import { extractShoppingRequirements } from "./requirement-extractor";
 import {
   getProductByIdOrSlug,
   listProducts,
-  SerializedProduct,
 } from "@/features/products/services/product-service";
 import { BudgetAnalysis, Product } from "@/features/shopping/types";
 

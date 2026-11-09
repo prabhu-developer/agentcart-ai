@@ -1,9 +1,13 @@
-import { describe, it } from "node:test";
+import { describe, it, after } from "node:test";
 import assert from "node:assert/strict";
+import mongoose from "mongoose";
 import { executeToolByName } from "../../src/features/agent/tools";
 import { connectDB } from "../../src/lib/db/connect";
 
 describe("Agent Tools Execution", () => {
+  after(async () => {
+    await mongoose.disconnect();
+  });
   it("rejects unknown tool name gracefully", async () => {
     const res = await executeToolByName("non_existent_tool", {});
     assert.strictEqual(res.success, false);

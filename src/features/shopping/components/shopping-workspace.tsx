@@ -9,7 +9,6 @@ import {
   RotateCcw,
   Menu,
   X,
-  ShieldCheck,
   ArrowRight,
   Database,
   MessageSquare,

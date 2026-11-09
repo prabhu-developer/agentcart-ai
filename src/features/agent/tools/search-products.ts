@@ -1,4 +1,4 @@
-import { searchProductsSchema, SearchProductsArgs } from "../schemas/tool-schemas";
+import { searchProductsSchema } from "../schemas/tool-schemas";
 import { listProducts } from "@/features/products/services/product-service";
 
 export interface SearchProductsToolOutput {

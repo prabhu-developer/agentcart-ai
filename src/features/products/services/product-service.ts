@@ -142,8 +142,14 @@ function serializeProduct(doc: RawProductDoc): SerializedProduct {
   };
 }
 
-export async function listProducts(params: ProductQueryParams): Promise<ProductListResult> {
+export type ListProductsInput = Partial<ProductQueryParams>;
+
+export async function listProducts(params: ListProductsInput = {}): Promise<ProductListResult> {
   await connectDB();
+
+  const page = Math.max(1, params.page ?? 1);
+  const limit = Math.min(50, Math.max(1, params.limit ?? 12));
+  const sort = params.sort ?? "newest";
 
   const query: ProductFilter = {
     isActive: true,
@@ -180,8 +186,8 @@ export async function listProducts(params: ProductQueryParams): Promise<ProductL
         return {
           products: [],
           pagination: {
-            page: params.page,
-            limit: params.limit,
+            page,
+            limit,
             total: 0,
             totalPages: 0,
           },
@@ -209,8 +215,8 @@ export async function listProducts(params: ProductQueryParams): Promise<ProductL
         return {
           products: [],
           pagination: {
-            page: params.page,
-            limit: params.limit,
+            page,
+            limit,
             total: 0,
             totalPages: 0,
           },
@@ -250,19 +256,17 @@ export async function listProducts(params: ProductQueryParams): Promise<ProductL
 
   // 7. Sort options
   let sortOptions: Record<string, mongoose.SortOrder> = { createdAt: -1 };
-  if (params.sort === "price_asc") {
+  if (sort === "price_asc") {
     sortOptions = { priceMinor: 1 };
-  } else if (params.sort === "price_desc") {
+  } else if (sort === "price_desc") {
     sortOptions = { priceMinor: -1 };
-  } else if (params.sort === "name_asc") {
+  } else if (sort === "name_asc") {
     sortOptions = { name: 1 };
-  } else if (params.sort === "newest") {
+  } else if (sort === "newest") {
     sortOptions = { createdAt: -1 };
   }
 
   // 8. Pagination execution
-  const page = Math.max(1, params.page);
-  const limit = Math.min(50, Math.max(1, params.limit));
   const skip = (page - 1) * limit;
 
   const [total, rawDocs] = await Promise.all([
