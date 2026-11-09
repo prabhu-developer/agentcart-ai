@@ -29,6 +29,7 @@ import { CartDrawer } from "./cart-drawer";
 import { Button } from "@/components/ui/button";
 import { CatalogBrowser } from "@/features/products/components/catalog-browser";
 import { sendShoppingInquiry } from "@/features/agent/services/shopping-client";
+import { toast } from "sonner";
 
 let messageSeq = 0;
 function createMessageId(prefix: string): string {
@@ -47,6 +48,8 @@ export function ShoppingWorkspace() {
     toggleCart,
     comparingProducts,
     openCompareModal,
+    clearCart,
+    refreshCart,
   } = useShoppingCart();
 
   const [activeView, setActiveView] = useState<"chat" | "catalog">(() =>
@@ -151,6 +154,7 @@ export function ShoppingWorkspace() {
           timestamp: "Just now",
           text: rec.text,
           type: rec.type,
+          source: rec.source,
           recommendedProducts: rec.products,
           comparisonProducts: rec.comparison,
           budgetAnalysis: rec.budget,
@@ -180,6 +184,7 @@ export function ShoppingWorkspace() {
             timestamp: "10:32 AM",
             text: rec.text,
             type: rec.type,
+            source: rec.source,
             recommendedProducts: rec.products,
             comparisonProducts: rec.comparison,
             budgetAnalysis: rec.budget,
@@ -220,6 +225,7 @@ export function ShoppingWorkspace() {
         timestamp: "Just now",
         text: rec.text,
         type: rec.type,
+        source: rec.source,
         recommendedProducts: rec.products,
         comparisonProducts: rec.comparison,
         budgetAnalysis: rec.budget,
@@ -285,6 +291,50 @@ export function ShoppingWorkspace() {
     setMobileSidebarOpen(false);
   };
 
+  const handleResetDemo = async () => {
+    try {
+      await fetch("/api/demo/reset", { method: "POST" });
+      await clearCart();
+      refreshCart();
+      toast.success("Demo State Reset", {
+        description: "Cart cleared and default home office demo loaded.",
+      });
+
+      const defaultPrompt =
+        "I need a complete home office setup under $1,000. I need a monitor, keyboard, mouse and ergonomic chair. Prioritize quality, reliability and value for money.";
+      setActiveView("chat");
+      setActiveSessionId("session-1");
+      setSessionTitle("Home Office Setup Under $1,000");
+      setIsTyping(true);
+      const rec = await queryAiShoppingAgent(defaultPrompt);
+      setMessages([
+        {
+          id: createMessageId("reset-user"),
+          sender: "user",
+          timestamp: "Just now",
+          text: defaultPrompt,
+        },
+        {
+          id: createMessageId("reset-assist"),
+          sender: "assistant",
+          timestamp: "Just now",
+          text: rec.text,
+          type: rec.type,
+          source: rec.source,
+          recommendedProducts: rec.products,
+          comparisonProducts: rec.comparison,
+          budgetAnalysis: rec.budget,
+          clarificationOptions: rec.clarificationOptions,
+          suggestedQueries: rec.suggestedQueries,
+        },
+      ]);
+      setIsTyping(false);
+      setMobileSidebarOpen(false);
+    } catch {
+      toast.error("Failed to reset demo state");
+    }
+  };
+
   return (
     <div className="flex h-[calc(100vh-64px)] w-full overflow-hidden bg-white">
       {/* Desktop Sidebar */}
@@ -293,6 +343,7 @@ export function ShoppingWorkspace() {
           activeSessionId={activeSessionId}
           onSelectSession={handleSelectSession}
           onNewSession={handleNewSession}
+          onResetDemo={handleResetDemo}
           activeView={activeView}
           onSelectView={setActiveView}
           onSelectCategory={(cat) => {
@@ -322,6 +373,7 @@ export function ShoppingWorkspace() {
               activeSessionId={activeSessionId}
               onSelectSession={handleSelectSession}
               onNewSession={handleNewSession}
+              onResetDemo={handleResetDemo}
               activeView={activeView}
               onSelectView={setActiveView}
               onSelectCategory={(cat) => {

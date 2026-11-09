@@ -78,12 +78,32 @@ export function ChatMessageItem({ message, onSelectPrompt }: ChatMessageItemProp
         }`}
       >
         {/* Meta Bar */}
-        <div className="flex items-center gap-2 mb-1 px-1 text-[11px] text-[#727b76]">
+        <div className="flex flex-wrap items-center gap-2 mb-1 px-1 text-[11px] text-[#727b76]">
           <span className="font-semibold text-[#202522]">
             {isAssistant ? "AgentCart Assistant" : "You"}
           </span>
           <span>·</span>
           <span>{message.timestamp}</span>
+
+          {isAssistant && message.source === "ai" && (
+            <span className="inline-flex items-center gap-1 rounded-md border border-[#0f766e]/20 bg-[#eaf5f2] px-1.5 py-0.5 text-[10px] font-semibold text-[#0f766e]">
+              <Sparkles className="size-2.5" />
+              <span>OpenRouter AI · Live Catalog Tools</span>
+            </span>
+          )}
+
+          {isAssistant && message.source === "fallback" && (
+            <span className="inline-flex items-center gap-1 rounded-md border border-amber-200 bg-amber-50 px-1.5 py-0.5 text-[10px] font-semibold text-amber-700">
+              <span className="size-1.5 rounded-full bg-amber-500" />
+              <span>Deterministic Engine · Live MongoDB</span>
+            </span>
+          )}
+
+          {isAssistant && message.source === "clarification" && (
+            <span className="inline-flex items-center gap-1 rounded-md border border-slate-200 bg-slate-50 px-1.5 py-0.5 text-[10px] font-medium text-slate-600">
+              <span>Clarification Needed</span>
+            </span>
+          )}
         </div>
 
         {/* Text Container */}

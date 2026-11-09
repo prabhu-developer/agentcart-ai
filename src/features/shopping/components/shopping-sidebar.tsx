@@ -14,6 +14,7 @@ import {
   Armchair,
   Database,
   User,
+  RotateCcw,
 } from "lucide-react";
 import { MOCK_RECENT_SESSIONS } from "../data/mock-products";
 import { useShoppingCart } from "../context/cart-context";
@@ -22,6 +23,7 @@ interface ShoppingSidebarProps {
   activeSessionId: string;
   onSelectSession: (sessionId: string) => void;
   onNewSession: () => void;
+  onResetDemo?: () => void;
   activeView?: "chat" | "catalog";
   onSelectView?: (view: "chat" | "catalog") => void;
   onSelectCategory?: (category: string) => void;
@@ -32,6 +34,7 @@ export function ShoppingSidebar({
   activeSessionId,
   onSelectSession,
   onNewSession,
+  onResetDemo,
   activeView = "chat",
   onSelectView,
   onSelectCategory,
@@ -94,7 +97,7 @@ export function ShoppingSidebar({
         </div>
 
         {/* New Session Action */}
-        <div>
+        <div className="flex flex-col gap-1.5">
           <button
             type="button"
             onClick={onNewSession}
@@ -103,6 +106,17 @@ export function ShoppingSidebar({
             <PlusCircle className="size-4" />
             <span>New Shopping Session</span>
           </button>
+
+          {onResetDemo && (
+            <button
+              type="button"
+              onClick={onResetDemo}
+              className="flex w-full items-center justify-center gap-1.5 rounded-xl border border-dashed border-[#e8ece9] bg-white/70 py-1.5 px-3 text-[11px] font-medium text-[#727b76] transition-colors hover:border-[#0f766e]/30 hover:bg-[#eaf5f2] hover:text-[#0f766e]"
+            >
+              <RotateCcw className="size-3" />
+              <span>Reset Demo State</span>
+            </button>
+          )}
         </div>
 
         {/* Recent Sessions List */}
@@ -249,12 +263,12 @@ export function ShoppingSidebar({
               <User className="size-3.5" />
             </div>
             <div className="flex flex-col">
-              <span className="text-xs font-medium text-[#202522]">MongoDB Connected</span>
-              <span className="text-[10px] text-[#727b76]">Phase 02 Live Catalog</span>
+              <span className="text-xs font-semibold text-[#202522]">MongoDB · PayPal Ready</span>
+              <span className="text-[10px] text-[#727b76]">Live Catalog & Sandbox</span>
             </div>
           </div>
           <span className="rounded-full bg-emerald-50 px-2 py-0.5 text-[9px] font-semibold text-emerald-700">
-            Online
+            Active
           </span>
         </div>
       </div>
