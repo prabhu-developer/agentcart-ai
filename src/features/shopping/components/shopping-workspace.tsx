@@ -1,35 +1,34 @@
 "use client";
 
-import React, { useState, useEffect, useRef, useCallback } from "react";
-import { useSearchParams } from "next/navigation";
+import { Button } from "@/components/ui/button";
+import { sendShoppingInquiry } from "@/features/agent/services/shopping-client";
+import { CatalogBrowser } from "@/features/products/components/catalog-browser";
 import {
-  Sparkles,
-  ShoppingBag,
-  SlidersHorizontal,
-  RotateCcw,
-  Menu,
-  X,
   ArrowRight,
   Database,
+  Menu,
   MessageSquare,
-  Bot,
+  RotateCcw,
+  ShoppingBag,
+  SlidersHorizontal,
+  Sparkles,
+  X
 } from "lucide-react";
-import { ChatMessage, Product } from "../types";
+import { useSearchParams } from "next/navigation";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { toast } from "sonner";
+import { useShoppingCart } from "../context/cart-context";
 import {
-  MOCK_RECENT_SESSIONS,
   MOCK_EXAMPLE_PROMPTS,
+  MOCK_RECENT_SESSIONS,
   getMockResponseForPrompt,
 } from "../data/mock-products";
-import { ChatMessageItem } from "./chat-message-item";
-import { ChatComposer } from "./chat-composer";
-import { ShoppingSidebar } from "./shopping-sidebar";
-import { useShoppingCart } from "../context/cart-context";
-import { ProductComparisonModal } from "./product-comparison-modal";
+import { ChatMessage, Product } from "../types";
 import { CartDrawer } from "./cart-drawer";
-import { Button } from "@/components/ui/button";
-import { CatalogBrowser } from "@/features/products/components/catalog-browser";
-import { sendShoppingInquiry } from "@/features/agent/services/shopping-client";
-import { toast } from "sonner";
+import { ChatComposer } from "./chat-composer";
+import { ChatMessageItem } from "./chat-message-item";
+import { ProductComparisonModal } from "./product-comparison-modal";
+import { ShoppingSidebar } from "./shopping-sidebar";
 
 let messageSeq = 0;
 function createMessageId(prefix: string): string {
@@ -424,11 +423,10 @@ export function ShoppingWorkspace() {
               <button
                 type="button"
                 onClick={() => setActiveView("chat")}
-                className={`flex items-center gap-1.5 rounded-lg px-2.5 py-1 font-medium transition-all ${
-                  activeView === "chat"
+                className={`flex items-center gap-1.5 rounded-lg px-2.5 py-1 font-medium transition-all ${activeView === "chat"
                     ? "bg-white text-[#0f766e] shadow-xs font-semibold"
                     : "text-[#727b76] hover:text-[#202522]"
-                }`}
+                  }`}
               >
                 <MessageSquare className="size-3.5" />
                 <span>AI Assistant</span>
@@ -437,11 +435,10 @@ export function ShoppingWorkspace() {
               <button
                 type="button"
                 onClick={() => setActiveView("catalog")}
-                className={`flex items-center gap-1.5 rounded-lg px-2.5 py-1 font-medium transition-all ${
-                  activeView === "catalog"
+                className={`flex items-center gap-1.5 rounded-lg px-2.5 py-1 font-medium transition-all ${activeView === "catalog"
                     ? "bg-white text-[#0f766e] shadow-xs font-semibold"
                     : "text-[#727b76] hover:text-[#202522]"
-                }`}
+                  }`}
               >
                 <Database className="size-3.5" />
                 <span>Catalog</span>
@@ -487,20 +484,6 @@ export function ShoppingWorkspace() {
             </Button>
           </div>
         </div>
-
-        {/* Phase 03 AI Shopping Notice Strip */}
-        <div className="flex items-center justify-between border-b border-[#e8ece9] bg-[#f8faf9] px-4 py-1.5 text-[11px] text-[#727b76]">
-          <div className="flex items-center gap-1.5">
-            <Bot className="size-3.5 text-[#0f766e]" />
-            <span>
-              Phase 03 AI Shopping Agent: OpenRouter LLM with controlled MongoDB tools and minor-unit budget verification.
-            </span>
-          </div>
-          <span className="hidden text-[10px] text-[#0f766e] font-medium md:inline">
-            5 Backend Tools Active
-          </span>
-        </div>
-
         {/* Workspace Body: Either Catalog Browser or Chat */}
         {activeView === "catalog" ? (
           <div className="flex-1 overflow-y-auto px-4 py-6 sm:px-8">
