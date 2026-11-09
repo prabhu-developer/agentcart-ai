@@ -1,40 +1,40 @@
 import { NextResponse } from "next/server";
 
-import {
-    GEMINI_MODEL,
-    getGeminiClient,
-} from "@/lib/ai/client";
+import { createAICompletion } from "@/lib/ai/client";
+import { env } from "@/lib/env";
 
 export async function GET() {
     try {
-        const ai = getGeminiClient();
-
-        const interaction: any = await ai.interactions.create({
-            model: GEMINI_MODEL,
-            input: "Reply with exactly: AgentCart AI connected",
-        });
-
-        const textOutput = interaction.outputs?.find(
-            (output: any) => output.type === "text",
-        );
+        const message = await createAICompletion([
+            {
+                role: "user",
+                content: "Reply with exactly: AgentCart AI connected",
+            },
+        ]);
 
         return NextResponse.json({
             success: true,
-            provider: "gemini",
-            model: GEMINI_MODEL,
-            message:
-                textOutput?.text ?? "Gemini connected successfully",
+            provider: "openrouter",
+            model: env.OPENROUTER_MODEL,
+            message,
         });
     } catch (error) {
-        console.error("Gemini health check failed:", error);
+        console.error("OpenRouter health check failed:", error);
+
+        const isTimeout =
+            error instanceof Error &&
+            (error.name === "TimeoutError" ||
+                error.name === "AbortError");
 
         return NextResponse.json(
             {
                 success: false,
-                provider: "gemini",
-                message: "AI provider connection failed",
+                provider: "openrouter",
+                message: isTimeout
+                    ? "AI request timed out"
+                    : "OpenRouter connection failed",
             },
-            { status: 500 },
+            { status: isTimeout ? 504 : 502 },
         );
     }
 }
