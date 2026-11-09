@@ -92,7 +92,7 @@ export function ProductDetailsDialog({
                 </div>
                 <div className="flex items-center gap-2">
                   <ShieldCheck className="size-4 text-[#0f766e]" />
-                  <span>Verified mock catalog specification accuracy</span>
+                  <span>Verified MongoDB catalog specification accuracy</span>
                 </div>
               </div>
             </div>

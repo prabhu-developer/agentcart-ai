@@ -12,6 +12,7 @@ import {
   Keyboard,
   Headphones,
   Armchair,
+  Database,
   User,
 } from "lucide-react";
 import { MOCK_RECENT_SESSIONS } from "../data/mock-products";
@@ -21,6 +22,9 @@ interface ShoppingSidebarProps {
   activeSessionId: string;
   onSelectSession: (sessionId: string) => void;
   onNewSession: () => void;
+  activeView?: "chat" | "catalog";
+  onSelectView?: (view: "chat" | "catalog") => void;
+  onSelectCategory?: (category: string) => void;
   className?: string;
 }
 
@@ -28,6 +32,9 @@ export function ShoppingSidebar({
   activeSessionId,
   onSelectSession,
   onNewSession,
+  activeView = "chat",
+  onSelectView,
+  onSelectCategory,
   className,
 }: ShoppingSidebarProps) {
   const { totalItems, formattedSubtotal, toggleCart, comparingProducts, openCompareModal } =
@@ -39,7 +46,7 @@ export function ShoppingSidebar({
         className || ""
       }`}
     >
-      <div className="flex flex-col gap-6 overflow-hidden">
+      <div className="flex flex-col gap-5 overflow-hidden">
         {/* Brand header */}
         <div className="flex items-center justify-between px-2 pt-1">
           <Link href="/" className="flex items-center gap-2.5">
@@ -57,12 +64,41 @@ export function ShoppingSidebar({
           </Link>
         </div>
 
+        {/* Workspace Mode Switcher */}
+        <div className="grid grid-cols-2 gap-1 rounded-xl border border-[#e8ece9] bg-white p-1 text-xs font-semibold">
+          <button
+            type="button"
+            onClick={() => onSelectView?.("chat")}
+            className={`flex items-center justify-center gap-1.5 rounded-lg py-1.5 transition-all ${
+              activeView === "chat"
+                ? "bg-[#0f766e] text-white shadow-xs"
+                : "text-[#727b76] hover:text-[#202522]"
+            }`}
+          >
+            <Sparkles className="size-3.5" />
+            <span>Assistant</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => onSelectView?.("catalog")}
+            className={`flex items-center justify-center gap-1.5 rounded-lg py-1.5 transition-all ${
+              activeView === "catalog"
+                ? "bg-[#0f766e] text-white shadow-xs"
+                : "text-[#727b76] hover:text-[#202522]"
+            }`}
+          >
+            <Database className="size-3.5" />
+            <span>Catalog (DB)</span>
+          </button>
+        </div>
+
         {/* New Session Action */}
         <div>
           <button
             type="button"
             onClick={onNewSession}
-            className="flex w-full items-center justify-center gap-2 rounded-xl border border-[#e8ece9] bg-white py-2.5 px-3 text-xs font-semibold text-[#0f766e] shadow-xs transition-colors hover:border-[#0f766e]/30 hover:bg-[#eaf5f2]"
+            className="flex w-full items-center justify-center gap-2 rounded-xl border border-[#e8ece9] bg-white py-2 px-3 text-xs font-semibold text-[#0f766e] shadow-xs transition-colors hover:border-[#0f766e]/30 hover:bg-[#eaf5f2]"
           >
             <PlusCircle className="size-4" />
             <span>New Shopping Session</span>
@@ -79,12 +115,15 @@ export function ShoppingSidebar({
 
           <div className="mt-1 flex flex-col gap-1 overflow-y-auto pr-1">
             {MOCK_RECENT_SESSIONS.map((session) => {
-              const isActive = session.id === activeSessionId;
+              const isActive = activeView === "chat" && session.id === activeSessionId;
               return (
                 <button
                   key={session.id}
                   type="button"
-                  onClick={() => onSelectSession(session.id)}
+                  onClick={() => {
+                    onSelectView?.("chat");
+                    onSelectSession(session.id);
+                  }}
                   className={`flex flex-col rounded-xl p-2.5 text-left transition-colors ${
                     isActive
                       ? "border border-[#0f766e]/20 bg-white shadow-xs text-[#202522]"
@@ -113,37 +152,53 @@ export function ShoppingSidebar({
         {/* Category shortcuts */}
         <div className="flex flex-col gap-1">
           <span className="px-2 text-[10px] font-bold uppercase tracking-wider text-[#727b76]">
-            Catalog Explorer
+            MongoDB Catalog
           </span>
           <div className="grid grid-cols-2 gap-1.5 pt-1 text-xs">
-            <Link
-              href="/#categories"
-              className="flex items-center gap-2 rounded-lg border border-[#e8ece9] bg-white p-2 text-[#727b76] transition-colors hover:text-[#202522]"
+            <button
+              type="button"
+              onClick={() => {
+                onSelectView?.("catalog");
+                onSelectCategory?.("workspace");
+              }}
+              className="flex items-center gap-2 rounded-lg border border-[#e8ece9] bg-white p-2 text-left text-[#727b76] transition-colors hover:text-[#202522]"
             >
               <Monitor className="size-3.5 text-[#0f766e]" />
               <span className="text-[11px]">Displays</span>
-            </Link>
-            <Link
-              href="/#categories"
-              className="flex items-center gap-2 rounded-lg border border-[#e8ece9] bg-white p-2 text-[#727b76] transition-colors hover:text-[#202522]"
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                onSelectView?.("catalog");
+                onSelectCategory?.("workspace");
+              }}
+              className="flex items-center gap-2 rounded-lg border border-[#e8ece9] bg-white p-2 text-left text-[#727b76] transition-colors hover:text-[#202522]"
             >
               <Keyboard className="size-3.5 text-[#0f766e]" />
               <span className="text-[11px]">Keyboards</span>
-            </Link>
-            <Link
-              href="/#categories"
-              className="flex items-center gap-2 rounded-lg border border-[#e8ece9] bg-white p-2 text-[#727b76] transition-colors hover:text-[#202522]"
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                onSelectView?.("catalog");
+                onSelectCategory?.("audio");
+              }}
+              className="flex items-center gap-2 rounded-lg border border-[#e8ece9] bg-white p-2 text-left text-[#727b76] transition-colors hover:text-[#202522]"
             >
               <Headphones className="size-3.5 text-[#0f766e]" />
               <span className="text-[11px]">Audio</span>
-            </Link>
-            <Link
-              href="/#categories"
-              className="flex items-center gap-2 rounded-lg border border-[#e8ece9] bg-white p-2 text-[#727b76] transition-colors hover:text-[#202522]"
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                onSelectView?.("catalog");
+                onSelectCategory?.("furniture");
+              }}
+              className="flex items-center gap-2 rounded-lg border border-[#e8ece9] bg-white p-2 text-left text-[#727b76] transition-colors hover:text-[#202522]"
             >
               <Armchair className="size-3.5 text-[#0f766e]" />
               <span className="text-[11px]">Chairs</span>
-            </Link>
+            </button>
           </div>
         </div>
       </div>
@@ -194,12 +249,12 @@ export function ShoppingSidebar({
               <User className="size-3.5" />
             </div>
             <div className="flex flex-col">
-              <span className="text-xs font-medium text-[#202522]">Demo Customer</span>
-              <span className="text-[10px] text-[#727b76]">Phase 01 Guest</span>
+              <span className="text-xs font-medium text-[#202522]">MongoDB Connected</span>
+              <span className="text-[10px] text-[#727b76]">Phase 02 Live Catalog</span>
             </div>
           </div>
           <span className="rounded-full bg-emerald-50 px-2 py-0.5 text-[9px] font-semibold text-emerald-700">
-            Light
+            Online
           </span>
         </div>
       </div>
