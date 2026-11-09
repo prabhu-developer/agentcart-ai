@@ -235,6 +235,7 @@ const OrderSchema = new Schema<IOrder>(
 
 // Compound indexes for efficient order lookups
 OrderSchema.index({ guestId: 1, createdAt: -1 });
+OrderSchema.index({ guestId: 1, idempotencyKey: 1 });
 
 export const Order: Model<IOrder> =
   mongoose.models.Order || mongoose.model<IOrder>("Order", OrderSchema);

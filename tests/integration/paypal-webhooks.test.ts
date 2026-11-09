@@ -192,4 +192,65 @@ describe("PayPal Webhook Verification & Event Processing", () => {
     assert.strictEqual(orderDoc.orderStatus, "PAID"); // Must remain PAID!
     assert.strictEqual(orderDoc.paymentStatus, "CAPTURED");
   });
+
+  it("allows retry when a previous event delivery had status FAILED (PayPal retry semantics)", async () => {
+    const eventId = `WH-RETRY-${Date.now()}`;
+
+    // 1. Simulate a transient failure during earlier delivery that left the event in FAILED state
+    await WebhookEvent.create({
+      eventId,
+      eventType: "PAYMENT.CAPTURE.COMPLETED",
+      paypalOrderId: testOrder.paypalOrderId,
+      status: "FAILED",
+      error: "Transient network timeout connecting to database",
+      processedAt: new Date(),
+    });
+
+    // 2. PayPal retries the webhook delivery
+    const retryResult = await processPayPalWebhookEvent(validHeaders, {
+      id: eventId,
+      event_type: "PAYMENT.CAPTURE.COMPLETED",
+      resource: {
+        id: "MOCK-CAPTURE-WH-RETRY",
+        custom_id: testOrder.id,
+      },
+    });
+
+    // 3. Must NOT be discarded or ignored merely because event ID exists!
+    assert.strictEqual(retryResult.status, "PROCESSED");
+
+    // 4. Verify WebhookEvent document was updated to PROCESSED
+    const updatedDoc = await WebhookEvent.findOne({ eventId });
+    assert.ok(updatedDoc);
+    assert.strictEqual(updatedDoc.status, "PROCESSED");
+    assert.strictEqual(updatedDoc.error, undefined);
+  });
+
+  it("handles concurrent duplicate webhook deliveries safely without racing or crashing", async () => {
+    const eventId = `WH-CONCURRENT-${Date.now()}`;
+
+    // Fire two identical deliveries at the exact same instant
+    const [res1, res2] = await Promise.all([
+      processPayPalWebhookEvent(validHeaders, {
+        id: eventId,
+        event_type: "PAYMENT.CAPTURE.COMPLETED",
+        resource: {
+          id: "MOCK-CAPTURE-CONC-001",
+          custom_id: testOrder.id,
+        },
+      }),
+      processPayPalWebhookEvent(validHeaders, {
+        id: eventId,
+        event_type: "PAYMENT.CAPTURE.COMPLETED",
+        resource: {
+          id: "MOCK-CAPTURE-CONC-001",
+          custom_id: testOrder.id,
+        },
+      }),
+    ]);
+
+    const statuses = [res1.status, res2.status];
+    assert.ok(statuses.includes("PROCESSED"), "At least one call must process successfully");
+    assert.ok(statuses.includes("IGNORED"), "The concurrent call must be safely ignored");
+  });
 });

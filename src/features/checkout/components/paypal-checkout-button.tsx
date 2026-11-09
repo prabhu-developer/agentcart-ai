@@ -11,17 +11,26 @@ import { ConfirmedOrderDTO } from "../services/checkout-service";
 
 interface PayPalCheckoutButtonProps {
   currency?: string;
+  idempotencyKey?: string;
   onPaymentSuccess: (order: ConfirmedOrderDTO) => void;
   onPaymentError?: (error: string) => void;
 }
 
 export function PayPalCheckoutButton({
   currency = "USD",
+  idempotencyKey,
   onPaymentSuccess,
   onPaymentError,
 }: PayPalCheckoutButtonProps) {
   const [isProcessing, setIsProcessing] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  // Maintain a stable session key across retries if not provided by review modal
+  const sessionKeyRef = React.useRef<string | null>(null);
+  if (!sessionKeyRef.current) {
+    sessionKeyRef.current = `checkout-${Math.random().toString(36).substring(2, 9)}-${Date.now()}`;
+  }
+  const effectiveIdempotencyKey = idempotencyKey || sessionKeyRef.current;
 
   const clientId = process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID || "";
 
@@ -52,7 +61,7 @@ export function PayPalCheckoutButton({
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          idempotencyKey: `checkout-${Date.now()}`,
+          idempotencyKey: effectiveIdempotencyKey,
         }),
       });
 

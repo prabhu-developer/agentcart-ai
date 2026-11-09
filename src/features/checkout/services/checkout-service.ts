@@ -171,20 +171,44 @@ export async function createCheckoutOrder(
   const orderNumber = generateOrderNumber();
 
   // 4. Create internal Order in PENDING_PAYMENT state
-  const internalOrder = await Order.create({
-    orderNumber,
-    guestId,
-    currency: cart.currency,
-    subtotalMinor,
-    taxMinor,
-    shippingMinor,
-    totalMinor,
-    items: orderItems,
-    orderStatus: "PENDING_PAYMENT",
-    paymentStatus: "CREATED",
-    paymentProvider: "PAYPAL",
-    idempotencyKey,
-  });
+  let internalOrder: IOrder;
+  try {
+    internalOrder = await Order.create({
+      orderNumber,
+      guestId,
+      currency: cart.currency,
+      subtotalMinor,
+      taxMinor,
+      shippingMinor,
+      totalMinor,
+      items: orderItems,
+      orderStatus: "PENDING_PAYMENT",
+      paymentStatus: "CREATED",
+      paymentProvider: "PAYPAL",
+      idempotencyKey,
+    });
+  } catch (err: unknown) {
+    // If a concurrent request with the same idempotency key already created the order
+    if (idempotencyKey) {
+      const concurrentOrder = await Order.findOne({
+        guestId,
+        idempotencyKey,
+        orderStatus: { $in: ["PENDING_PAYMENT", "PAID"] },
+      });
+      if (concurrentOrder && concurrentOrder.paypalOrderId) {
+        return {
+          orderId: concurrentOrder._id.toString(),
+          orderNumber: concurrentOrder.orderNumber,
+          paypalOrderId: concurrentOrder.paypalOrderId,
+          currency: concurrentOrder.currency,
+          totalMinor: concurrentOrder.totalMinor,
+          total: Number((concurrentOrder.totalMinor / 100).toFixed(2)),
+          itemsCount: concurrentOrder.items.reduce((acc, i) => acc + i.quantity, 0),
+        };
+      }
+    }
+    throw err;
+  }
 
   // 5. Create PayPal Order via REST API v2
   try {
@@ -311,12 +335,47 @@ export async function captureCheckoutOrder(
     );
   }
 
-  // 6. Execute server-side capture if not already completed
+  // 6. Execute server-side capture or reconcile existing completed capture
   let captureId: string | undefined = undefined;
 
   if (paypalOrder.status === "COMPLETED") {
-    // Already completed on PayPal side (e.g. via webhook or retry)
-    captureId = purchaseUnit.payments?.captures?.[0]?.id;
+    // Already completed on PayPal side (e.g. earlier attempt timed out or completed via webhook).
+    // Reconcile without initiating a duplicate capture charge.
+    const completedCaptures = purchaseUnit.payments?.captures || [];
+    const validCapture =
+      completedCaptures.find((c) => c.status === "COMPLETED") ||
+      completedCaptures[0];
+
+    if (!validCapture || validCapture.status !== "COMPLETED") {
+      throw new CheckoutError(
+        "PayPal order is COMPLETED but no valid COMPLETED capture was found",
+        409,
+        "CAPTURE_NOT_FOUND"
+      );
+    }
+
+    // Verify existing capture amount and currency against internal order
+    if (validCapture.amount) {
+      if (validCapture.amount.value !== expectedAmountStr) {
+        throw new CheckoutError(
+          `Reconciled capture amount ${validCapture.amount.value} does not match order ${expectedAmountStr}`,
+          409,
+          "AMOUNT_MISMATCH"
+        );
+      }
+      if (
+        validCapture.amount.currency_code.toUpperCase() !==
+        order.currency.toUpperCase()
+      ) {
+        throw new CheckoutError(
+          `Reconciled capture currency ${validCapture.amount.currency_code} does not match order ${order.currency}`,
+          409,
+          "CURRENCY_MISMATCH"
+        );
+      }
+    }
+
+    captureId = validCapture.id;
   } else if (paypalOrder.status === "APPROVED") {
     order.paymentStatus = "CAPTURE_PENDING";
     await order.save();
@@ -457,13 +516,82 @@ export async function processPayPalWebhookEvent(
     throw new CheckoutError("Missing webhook event ID", 400);
   }
 
-  // 2. Idempotency: Check if already processed
+  // 2. Idempotency & Concurrency: Check if event already exists
   const existingEvent = await WebhookEvent.findOne({ eventId });
   if (existingEvent) {
-    return {
-      status: "IGNORED",
-      message: `Webhook event ${eventId} already processed with status ${existingEvent.status}`,
-    };
+    if (existingEvent.status === "PROCESSED") {
+      return {
+        status: "IGNORED",
+        message: `Webhook event ${eventId} already processed successfully`,
+      };
+    }
+    if (existingEvent.status === "IGNORED") {
+      return {
+        status: "IGNORED",
+        message: `Webhook event ${eventId} was previously marked as ignored`,
+      };
+    }
+    if (existingEvent.status === "PROCESSING") {
+      // Check for concurrent processing lock (active within last 30 seconds)
+      const lastActivityTime = existingEvent.updatedAt
+        ? new Date(existingEvent.updatedAt).getTime()
+        : new Date(existingEvent.processedAt).getTime();
+      const isStale = Date.now() - lastActivityTime > 30_000;
+
+      if (!isStale) {
+        return {
+          status: "IGNORED",
+          message: `Webhook event ${eventId} is currently being processed by a concurrent request`,
+        };
+      }
+      // If stale, the previous worker likely died or timed out; allow retry below.
+    }
+    // If existingEvent.status === "FAILED" (or stale PROCESSING), allow retry!
+  }
+
+  // 3. Atomically claim the event to prevent concurrent double-processing
+  let claimedEvent;
+  if (existingEvent) {
+    claimedEvent = await WebhookEvent.findOneAndUpdate(
+      { eventId, status: { $in: ["FAILED", "PROCESSING"] } },
+      {
+        $set: {
+          status: "PROCESSING",
+          processedAt: new Date(),
+        },
+        $unset: {
+          error: 1,
+        },
+      },
+      { returnDocument: "after" }
+    );
+    if (!claimedEvent) {
+      // Another concurrent worker claimed or completed it
+      return {
+        status: "IGNORED",
+        message: `Webhook event ${eventId} is being processed concurrently`,
+      };
+    }
+  } else {
+    try {
+      claimedEvent = await WebhookEvent.create({
+        eventId,
+        eventType,
+        status: "PROCESSING",
+        processedAt: new Date(),
+      });
+    } catch (createErr: unknown) {
+      const mongoErr = createErr as { code?: number };
+      if (mongoErr.code === 11000) {
+        // Unique index collision: concurrent insertion of the same eventId
+        return {
+          status: "IGNORED",
+          message: `Webhook event ${eventId} was claimed concurrently`,
+        };
+      }
+      // Re-throw database errors so route returns 500 and PayPal will retry
+      throw createErr;
+    }
   }
 
   const resource = (webhookEvent.resource || {}) as Record<string, unknown>;
@@ -542,31 +670,40 @@ export async function processPayPalWebhookEvent(
       }
 
       default:
-        // Other events can be safely recorded as PROCESSED or IGNORED
+        // Other events can be safely recorded as PROCESSED
         break;
     }
 
-    await WebhookEvent.create({
-      eventId,
-      eventType,
-      orderId: associatedOrderId,
-      paypalOrderId,
-      status: "PROCESSED",
-      processedAt: new Date(),
-    });
+    await WebhookEvent.updateOne(
+      { eventId },
+      {
+        $set: {
+          status: "PROCESSED",
+          orderId: associatedOrderId,
+          paypalOrderId,
+          processedAt: new Date(),
+        },
+        $unset: {
+          error: 1,
+        },
+      }
+    );
 
     return { status: "PROCESSED", message: `Event ${eventType} handled successfully` };
   } catch (err: unknown) {
     const errorMsg = err instanceof Error ? err.message : String(err);
-    await WebhookEvent.create({
-      eventId,
-      eventType,
-      orderId: associatedOrderId,
-      paypalOrderId,
-      status: "FAILED",
-      error: errorMsg,
-      processedAt: new Date(),
-    });
+    await WebhookEvent.updateOne(
+      { eventId },
+      {
+        $set: {
+          status: "FAILED",
+          orderId: associatedOrderId,
+          paypalOrderId,
+          error: errorMsg,
+          processedAt: new Date(),
+        },
+      }
+    ).catch(() => {});
     throw err;
   }
 }

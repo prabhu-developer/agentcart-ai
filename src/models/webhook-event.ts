@@ -5,7 +5,7 @@ export interface IWebhookEvent extends Document {
   eventType: string;
   orderId?: mongoose.Types.ObjectId;
   paypalOrderId?: string;
-  status: "PROCESSED" | "FAILED" | "IGNORED";
+  status: "PROCESSING" | "PROCESSED" | "FAILED" | "IGNORED";
   processedAt: Date;
   error?: string;
   createdAt: Date;
@@ -41,7 +41,7 @@ const WebhookEventSchema = new Schema<IWebhookEvent>(
     },
     status: {
       type: String,
-      enum: ["PROCESSED", "FAILED", "IGNORED"],
+      enum: ["PROCESSING", "PROCESSED", "FAILED", "IGNORED"],
       required: true,
       index: true,
     },

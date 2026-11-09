@@ -47,6 +47,7 @@ export function CartDrawer() {
   const [isValidating, setIsValidating] = useState(false);
   const [prepResult, setPrepResult] = useState<CheckoutPreparation | null>(null);
   const [confirmedOrder, setConfirmedOrder] = useState<ConfirmedOrderDTO | null>(null);
+  const [checkoutAttemptKey, setCheckoutAttemptKey] = useState<string>("");
 
   const freeShippingThreshold = 50;
   const progressToFreeShipping = Math.min(100, (subtotal / freeShippingThreshold) * 100);
@@ -59,6 +60,9 @@ export function CartDrawer() {
     setIsValidating(false);
     if (result) {
       setPrepResult(result);
+      setCheckoutAttemptKey(
+        `checkout-${Math.random().toString(36).substring(2, 9)}-${Date.now()}`
+      );
       setCheckoutModalOpen(true);
     }
   };
@@ -403,6 +407,7 @@ export function CartDrawer() {
                   <div className="mt-4 border-t border-[#e8ece9] pt-4">
                     <PayPalCheckoutButton
                       currency={prepResult.currency}
+                      idempotencyKey={checkoutAttemptKey}
                       onPaymentSuccess={handlePaymentSuccess}
                     />
                   </div>

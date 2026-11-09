@@ -20,6 +20,7 @@ describe("Checkout Capture Integration", () => {
   let originalFetch: typeof globalThis.fetch;
   let simulatedPayPalAmount: string = "0.00";
   let simulatedStatus: string = "APPROVED";
+  let captureCallCount: number = 0;
 
   before(async () => {
     await connectDB();
@@ -64,6 +65,7 @@ describe("Checkout Capture Integration", () => {
 
       // Capture order mock
       if (urlStr.includes("/capture") && init?.method === "POST") {
+        captureCallCount++;
         return new Response(
           JSON.stringify({
             id: "MOCK-PAYPAL-ORDER",
@@ -99,6 +101,21 @@ describe("Checkout Capture Integration", () => {
                   currency_code: "USD",
                   value: simulatedPayPalAmount,
                 },
+                payments:
+                  simulatedStatus === "COMPLETED"
+                    ? {
+                        captures: [
+                          {
+                            id: "MOCK-RECONCILED-CAPTURE-123",
+                            status: "COMPLETED",
+                            amount: {
+                              currency_code: "USD",
+                              value: simulatedPayPalAmount,
+                            },
+                          },
+                        ],
+                      }
+                    : undefined,
               },
             ],
           }),
@@ -186,5 +203,42 @@ describe("Checkout Capture Integration", () => {
     const confirmedAgain = await captureCheckoutOrder(guestIdA, existingOrder.paypalOrderId!);
     assert.strictEqual(confirmedAgain.orderStatus, "PAID");
     assert.strictEqual(confirmedAgain.orderNumber, existingOrder.orderNumber);
+  });
+
+  it("safely reconciles capture when PayPal succeeded but application timed out before MongoDB update", async () => {
+    // 1. Set up a fresh cart and create internal pending order
+    await Cart.deleteOne({ guestId: guestIdA });
+    await addItemToCart(guestIdA, testProduct.id, 1);
+    const summary = await createCheckoutOrder(guestIdA);
+
+    // 2. Simulate timeout scenario:
+    // PayPal processed and completed the order, but MongoDB order remained PENDING_PAYMENT
+    simulatedPayPalAmount = summary.total.toFixed(2);
+    simulatedStatus = "COMPLETED"; // PayPal shows COMPLETED
+    captureCallCount = 0; // Reset call counter
+
+    // Verify order is still PENDING_PAYMENT in database
+    const pendingOrder = await Order.findById(summary.orderId);
+    assert.strictEqual(pendingOrder?.orderStatus, "PENDING_PAYMENT");
+
+    // 3. Customer retries capture (or network resumes)
+    const reconciledOrder = await captureCheckoutOrder(guestIdA, summary.paypalOrderId);
+
+    // 4. Assert order is safely reconciled to PAID without another PayPal capture API call
+    assert.strictEqual(reconciledOrder.orderStatus, "PAID");
+    assert.strictEqual(reconciledOrder.paymentStatus, "CAPTURED");
+    assert.strictEqual(reconciledOrder.orderNumber, summary.orderNumber);
+    assert.strictEqual(captureCallCount, 0, "Must NEVER execute a blind second capture call");
+
+    // 5. Verify DB state and capture ID recorded
+    const savedOrder = await Order.findById(summary.orderId);
+    assert.ok(savedOrder);
+    assert.strictEqual(savedOrder.orderStatus, "PAID");
+    assert.strictEqual(savedOrder.paymentStatus, "CAPTURED");
+    assert.strictEqual(savedOrder.paypalCaptureId, "MOCK-RECONCILED-CAPTURE-123");
+
+    // 6. Verify cart was cleared
+    const cart = await getAuthoritativeCart(guestIdA);
+    assert.strictEqual(cart.items.length, 0);
   });
 });
