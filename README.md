@@ -1,36 +1,113 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# AgentCart AI — Personal Shopping Assistant & PayPal Orders v2 Integration
 
-## Getting Started
+AgentCart is an AI-powered personal shopping concierge built for the PayPal AI Hackathon using Next.js App Router, React 19, TypeScript, Tailwind CSS, MongoDB/Mongoose, OpenRouter LLM, and official PayPal REST Orders API v2.
 
-First, run the development server:
+---
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+## 1. System Architecture
+
+```text
+Browser
+  ↓ (User Reviews Verified MongoDB Products)
+Backend Checkout Preparation (POST /api/checkout/create-order)
+  ↓ (Validates items, stock, prices, currency, minor-unit total)
+PayPal REST API v2 Order Creation
+  ↓ (Server returns PayPal Order ID to JS SDK)
+PayPal JavaScript SDK (Customer approves popup in Sandbox)
+  ↓ (SDK triggers onApprove callback with orderID)
+Backend Capture & Verification (POST /api/checkout/capture-order)
+  ↓ (Validates amount, currency, custom_id, captures payment)
+MongoDB Order Persistence & Cart Clearing
+  ↓ (Status transitions to PAID, guest cart cleared)
+Receipt Display & Webhook Idempotency (POST /api/webhooks/paypal)
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+---
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## 2. PayPal Sandbox Setup Guide
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### A. Create a PayPal Developer Account & Application
+1. Log in to the [PayPal Developer Dashboard](https://developer.paypal.com/dashboard/).
+2. Navigate to **Apps & Credentials** and ensure the **Sandbox** toggle is selected.
+3. Click **Create App**:
+   - **App Name:** `AgentCart AI Assistant`
+   - **App Type:** `Merchant`
+4. Copy the generated credentials:
+   - **Client ID**
+   - **Secret Key**
 
-## Learn More
+### B. Configure Environment Variables
+Create or update `.env.local` with the copied values:
 
-To learn more about Next.js, take a look at the following resources:
+```bash
+# PayPal REST API v2 Sandbox Configuration
+PAYPAL_ENVIRONMENT=sandbox
+PAYPAL_CLIENT_ID=your-sandbox-client-id
+PAYPAL_CLIENT_SECRET=your-sandbox-client-secret
+PAYPAL_WEBHOOK_ID=your-sandbox-webhook-id
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+# Public Client ID for PayPal JavaScript SDK
+NEXT_PUBLIC_PAYPAL_CLIENT_ID=your-sandbox-client-id
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### C. Testing with Sandbox Accounts
+1. In the PayPal Developer Dashboard, navigate to **Sandbox** → **Accounts**.
+2. Identify:
+   - **Personal (Buyer) Account**: Used to simulate the customer approving payment in the popup.
+   - **Business (Merchant) Account**: Receives captured funds.
+3. In AgentCart, open the cart drawer, click **Proceed to Review**, and select **PayPal**.
+4. Log in using your Sandbox Buyer email and password to complete the simulated checkout.
 
-## Deploy on Vercel
+---
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## 3. Webhook Configuration
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+1. In your PayPal App settings, click **Add Webhook**.
+2. **Webhook URL:** `https://your-domain.com/api/webhooks/paypal` (for local development, use a tunnel like ngrok).
+3. **Event Subscriptions:** Subscribe to the following core events:
+   - `PAYMENT.CAPTURE.COMPLETED`
+   - `PAYMENT.CAPTURE.DENIED`
+   - `PAYMENT.CAPTURE.REFUNDED`
+4. Copy the generated **Webhook ID** and paste it into `PAYPAL_WEBHOOK_ID` in `.env.local`.
+
+---
+
+## 4. Switching to Production (Live Mode) Safely
+
+To transition to production:
+1. In the PayPal Developer Dashboard, switch to **Live** mode.
+2. Create a Live App and obtain Live Client ID and Secret.
+3. Set production environment variables:
+   - `PAYPAL_ENVIRONMENT=live`
+   - `PAYPAL_CLIENT_ID=<live_client_id>`
+   - `PAYPAL_CLIENT_SECRET=<live_client_secret>`
+   - `NEXT_PUBLIC_PAYPAL_CLIENT_ID=<live_client_id>`
+   - `PAYPAL_WEBHOOK_ID=<live_webhook_id>`
+4. Live API endpoints automatically resolve to `https://api-m.paypal.com`.
+
+---
+
+## 5. Development & Testing Commands
+
+```bash
+# Install dependencies
+pnpm install
+
+# Seed the product catalog
+pnpm db:seed
+
+# Run the local development server
+pnpm dev
+
+# Run automated tests (Unit & Integration tests)
+pnpm test
+
+# Run TypeScript type check
+pnpm typecheck
+
+# Run ESLint validation
+pnpm lint
+
+# Production Next.js Turbopack build
+pnpm build
+```
