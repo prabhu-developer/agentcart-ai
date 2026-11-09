@@ -2,7 +2,14 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
-import { ShoppingBag, ArrowRight, ShieldCheck, Sparkles, CheckCircle2 } from "lucide-react";
+import {
+  ShoppingBag,
+  ArrowRight,
+  ShieldCheck,
+  Sparkles,
+  CheckCircle2,
+  AlertTriangle,
+} from "lucide-react";
 import {
   Sheet,
   SheetContent,
@@ -14,6 +21,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { useShoppingCart } from "../context/cart-context";
 import { CartItemRow } from "./cart-item";
+import { CheckoutPreparation } from "@/features/cart/types";
 
 export function CartDrawer() {
   const {
@@ -27,13 +35,27 @@ export function CartDrawer() {
     isCartOpen,
     closeCart,
     clearCart,
+    validationIssues,
+    validateForCheckout,
   } = useShoppingCart();
 
   const [checkoutModalOpen, setCheckoutModalOpen] = useState(false);
+  const [isValidating, setIsValidating] = useState(false);
+  const [prepResult, setPrepResult] = useState<CheckoutPreparation | null>(null);
 
   const freeShippingThreshold = 50;
   const progressToFreeShipping = Math.min(100, (subtotal / freeShippingThreshold) * 100);
   const remainingForFreeShipping = Math.max(0, freeShippingThreshold - subtotal);
+
+  const handleProceedToReview = async () => {
+    setIsValidating(true);
+    const result = await validateForCheckout();
+    setIsValidating(false);
+    if (result) {
+      setPrepResult(result);
+      setCheckoutModalOpen(true);
+    }
+  };
 
   return (
     <>
@@ -57,7 +79,7 @@ export function CartDrawer() {
                 {items.length > 0 && (
                   <button
                     type="button"
-                    onClick={clearCart}
+                    onClick={() => clearCart()}
                     className="text-xs text-[#727b76] underline-offset-4 hover:text-rose-600 hover:underline"
                   >
                     Clear All
@@ -65,7 +87,7 @@ export function CartDrawer() {
                 )}
               </div>
               <SheetDescription className="text-xs text-[#727b76]">
-                Curated items ready for final review and PayPal checkout.
+                Server-validated cart items backed by real-time MongoDB inventory.
               </SheetDescription>
 
               {/* Free shipping banner */}
@@ -91,6 +113,21 @@ export function CartDrawer() {
                   </div>
                 </div>
               )}
+
+              {/* Active Cart Validation Issues Alert */}
+              {validationIssues.length > 0 && (
+                <div className="mt-3 rounded-lg border border-amber-200 bg-amber-50 p-2.5 text-xs text-amber-900">
+                  <div className="flex items-center gap-1.5 font-semibold text-amber-800">
+                    <AlertTriangle className="size-3.5" />
+                    <span>Cart Inventory Notices:</span>
+                  </div>
+                  <ul className="mt-1 list-disc pl-4 space-y-0.5 text-[11px] text-amber-700">
+                    {validationIssues.map((issue, idx) => (
+                      <li key={idx}>{issue}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
             </SheetHeader>
 
             {/* Cart Body */}
@@ -104,7 +141,7 @@ export function CartDrawer() {
                     Your cart is currently empty
                   </h3>
                   <p className="mt-1.5 max-w-xs text-xs text-[#727b76]">
-                    Describe what you need in the shopping assistant to discover curated product recommendations.
+                    Describe what you need in the AI shopping assistant to discover curated, budget-optimized product recommendations.
                   </p>
                   <Link
                     href="/shop"
@@ -129,8 +166,8 @@ export function CartDrawer() {
               <SheetFooter className="border-t border-[#e8ece9] bg-[#f8faf9] p-6">
                 <div className="w-full space-y-2 text-xs text-[#727b76]">
                   <div className="flex justify-between">
-                    <span>Subtotal</span>
-                    <span className="font-medium text-[#202522]">{formattedSubtotal}</span>
+                    <span>Authoritative Subtotal</span>
+                    <span className="font-semibold text-[#202522]">{formattedSubtotal}</span>
                   </div>
                   <div className="flex justify-between">
                     <span>Estimated Shipping</span>
@@ -147,24 +184,34 @@ export function CartDrawer() {
                     <span className="font-medium text-[#202522]">${estimatedTax.toFixed(2)}</span>
                   </div>
                   <div className="flex justify-between border-t border-[#e8ece9] pt-2 text-sm font-semibold text-[#202522]">
-                    <span>Total</span>
+                    <span>Estimated Total</span>
                     <span className="text-base text-[#0f766e]">{formattedTotal}</span>
                   </div>
 
                   <div className="pt-2">
                     <Button
-                      onClick={() => setCheckoutModalOpen(true)}
+                      onClick={handleProceedToReview}
+                      disabled={isValidating}
                       className="w-full bg-[#0f766e] text-white hover:bg-[#115e59]"
                       size="lg"
                     >
-                      <span>Proceed to Review</span>
-                      <ArrowRight className="size-4" />
+                      {isValidating ? (
+                        <>
+                          <Sparkles className="size-4 animate-spin" />
+                          <span>Validating with MongoDB...</span>
+                        </>
+                      ) : (
+                        <>
+                          <span>Proceed to Review</span>
+                          <ArrowRight className="size-4" />
+                        </>
+                      )}
                     </Button>
                   </div>
 
                   <div className="flex items-center justify-center gap-1.5 pt-1 text-[11px] text-[#727b76]">
                     <ShieldCheck className="size-3.5 text-[#0f766e]" />
-                    <span>Secure PayPal checkout integration ready for Phase 02</span>
+                    <span>Server-authoritative cart with minor-unit precision</span>
                   </div>
                 </div>
               </SheetFooter>
@@ -173,26 +220,104 @@ export function CartDrawer() {
         </SheetContent>
       </Sheet>
 
-      {/* Phase 01 Boundary Modal for Checkout Review */}
-      {checkoutModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 p-4 backdrop-blur-xs">
-          <div className="w-full max-w-md rounded-2xl border border-[#e8ece9] bg-white p-6 shadow-xl">
-            <div className="flex size-12 items-center justify-center rounded-xl bg-[#eaf5f2] text-[#0f766e]">
-              <CheckCircle2 className="size-6" />
+      {/* Phase 04 Server Checkout Preparation Modal */}
+      {checkoutModalOpen && prepResult && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 backdrop-blur-xs">
+          <div className="w-full max-w-lg rounded-2xl border border-[#e8ece9] bg-white p-6 shadow-2xl">
+            <div className="flex items-center justify-between border-b border-[#e8ece9] pb-4">
+              <div className="flex items-center gap-3">
+                <div
+                  className={`flex size-10 items-center justify-center rounded-xl ${
+                    prepResult.isValid
+                      ? "bg-[#eaf5f2] text-[#0f766e]"
+                      : "bg-amber-100 text-amber-700"
+                  }`}
+                >
+                  {prepResult.isValid ? (
+                    <CheckCircle2 className="size-5" />
+                  ) : (
+                    <AlertTriangle className="size-5" />
+                  )}
+                </div>
+                <div>
+                  <h3 className="text-base font-bold text-[#202522]">
+                    {prepResult.isValid
+                      ? "Validated Checkout Summary"
+                      : "Cart Requires Attention"}
+                  </h3>
+                  <p className="text-xs text-[#727b76]">
+                    Pre-checkout verification via MongoDB backend service
+                  </p>
+                </div>
+              </div>
+
+              <span
+                className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${
+                  prepResult.isValid
+                    ? "bg-emerald-50 text-emerald-700"
+                    : "bg-amber-50 text-amber-700"
+                }`}
+              >
+                {prepResult.isValid ? "Eligible for Checkout" : "Issues Detected"}
+              </span>
             </div>
 
-            <h3 className="mt-4 text-lg font-semibold text-[#202522]">
-              Cart Order Prepared
-            </h3>
-            <p className="mt-2 text-sm leading-relaxed text-[#727b76]">
-              Your {totalItems} items ({formattedTotal}) are verified and organized in the local cart.
-            </p>
+            {/* Validation issues if any */}
+            {prepResult.issues.length > 0 && (
+              <div className="mt-4 rounded-xl border border-amber-200 bg-amber-50 p-3 text-xs text-amber-900">
+                <span className="font-semibold text-amber-800">
+                  Validation issues detected before checkout:
+                </span>
+                <ul className="mt-1 list-disc pl-4 space-y-0.5 text-[11px] text-amber-700">
+                  {prepResult.issues.map((issue, idx) => (
+                    <li key={idx}>{issue}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
 
-            <div className="mt-4 rounded-xl border border-[#e8ece9] bg-[#f8faf9] p-3 text-xs text-[#202522]">
-              <div className="font-medium text-[#0f766e]">Phase 01 UI Foundation Note:</div>
-              <p className="mt-1 text-[#727b76]">
-                Live PayPal order creation and webhook processing are strictly scoped for Phase 02. No actual transaction has taken place.
-              </p>
+            {/* Itemized Line Items */}
+            <div className="mt-4 max-h-56 overflow-y-auto divide-y divide-[#e8ece9] rounded-xl border border-[#e8ece9] bg-[#f8faf9] p-3 text-xs">
+              {prepResult.items.map((item) => (
+                <div
+                  key={item.productId}
+                  className="flex items-center justify-between py-2 first:pt-0 last:pb-0"
+                >
+                  <div className="min-w-0 pr-2">
+                    <p className="truncate font-semibold text-[#202522]">
+                      {item.name}
+                    </p>
+                    <p className="text-[11px] text-[#727b76]">
+                      ${item.price.toFixed(2)} × {item.quantity} · {item.brand}
+                    </p>
+                  </div>
+                  <span className="shrink-0 font-bold text-[#202522]">
+                    ${item.lineTotal.toFixed(2)}
+                  </span>
+                </div>
+              ))}
+            </div>
+
+            {/* Financial Totals */}
+            <div className="mt-4 rounded-xl border border-[#e8ece9] bg-white p-3 space-y-1.5 text-xs">
+              <div className="flex justify-between text-[#727b76]">
+                <span>Authoritative Subtotal</span>
+                <span className="font-bold text-[#202522]">
+                  {prepResult.formattedSubtotal} ({prepResult.currency})
+                </span>
+              </div>
+              <div className="flex justify-between text-[11px] text-[#727b76]">
+                <span>Tax & Shipping</span>
+                <span className="italic">Calculated during PayPal order step</span>
+              </div>
+            </div>
+
+            {/* Phase 04 Scope Notice */}
+            <div className="mt-4 rounded-xl border border-[#e8ece9] bg-[#f8faf9] p-3 text-[11px] leading-relaxed text-[#727b76]">
+              <span className="font-semibold text-[#0f766e]">
+                Phase 04 Server Checkout Preparation:
+              </span>{" "}
+              All line items, live inventory levels, and prices are validated from MongoDB using minor-unit calculations. No payment order has been created. Phase 05 will connect PayPal REST Orders API v2.
             </div>
 
             <div className="mt-6 flex justify-end gap-2.5">

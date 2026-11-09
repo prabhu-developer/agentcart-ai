@@ -22,7 +22,8 @@ interface ChatMessageItemProps {
 }
 
 export function ChatMessageItem({ message, onSelectPrompt }: ChatMessageItemProps) {
-  const { toggleCompare, openCompareModal, addToCart, openCart } = useShoppingCart();
+  const { toggleCompare, openCompareModal, addBulkToCart, openCart } = useShoppingCart();
+  const [isAddingAll, setIsAddingAll] = useState(false);
   const [addedAll, setAddedAll] = useState(false);
 
   const isAssistant = message.sender === "assistant";
@@ -35,15 +36,21 @@ export function ChatMessageItem({ message, onSelectPrompt }: ChatMessageItemProp
     }
   };
 
-  const handleAddAllToCart = () => {
+  const handleAddAllToCart = async () => {
     if (message.recommendedProducts && message.recommendedProducts.length > 0) {
-      message.recommendedProducts.forEach((p) => {
-        addToCart(p, 1);
-      });
-      setAddedAll(true);
-      setTimeout(() => {
-        openCart();
-      }, 300);
+      setIsAddingAll(true);
+      const bulkItems = message.recommendedProducts.map((p) => ({
+        productId: p.id,
+        quantity: 1,
+      }));
+      const success = await addBulkToCart(bulkItems);
+      setIsAddingAll(false);
+      if (success) {
+        setAddedAll(true);
+        setTimeout(() => {
+          openCart();
+        }, 300);
+      }
     }
   };
 
@@ -142,10 +149,15 @@ export function ChatMessageItem({ message, onSelectPrompt }: ChatMessageItemProp
                   variant="default"
                   size="sm"
                   onClick={handleAddAllToCart}
-                  disabled={addedAll}
+                  disabled={addedAll || isAddingAll}
                   className="h-7 gap-1 bg-[#0f766e] text-xs font-medium text-white hover:bg-[#115e59]"
                 >
-                  {addedAll ? (
+                  {isAddingAll ? (
+                    <>
+                      <Sparkles className="size-3 animate-spin" />
+                      <span>Verifying & Adding...</span>
+                    </>
+                  ) : addedAll ? (
                     <>
                       <CheckCircle2 className="size-3 text-emerald-300" />
                       <span>Added to Cart</span>

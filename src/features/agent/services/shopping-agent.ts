@@ -193,6 +193,7 @@ export async function runShoppingAgent(
         limit: 4,
       });
       fallbackList.products.forEach((p) => discoveredProductIds.add(p.id));
+      toolsCalled.push("search_products (fallback)");
     }
   }
 
@@ -268,6 +269,9 @@ export async function runShoppingAgent(
         amount: p.price,
       })),
     };
+    if (!toolsCalled.some((t) => t.includes("calculate_budget"))) {
+      toolsCalled.push("calculate_budget");
+    }
   }
 
   // Build clean final explanation text if empty
