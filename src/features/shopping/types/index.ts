@@ -43,6 +43,7 @@ export interface ChatMessage {
   timestamp: string;
   text: string;
   type?: "recommendation" | "clarification" | "message" | "error";
+  source?: "ai" | "fallback" | "clarification";
   recommendedProducts?: Product[];
   comparisonProducts?: Product[];
   budgetAnalysis?: BudgetAnalysis;

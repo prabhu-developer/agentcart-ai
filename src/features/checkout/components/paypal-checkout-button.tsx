@@ -25,12 +25,8 @@ export function PayPalCheckoutButton({
   const [isProcessing, setIsProcessing] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  // Maintain a stable session key across retries if not provided by review modal
-  const sessionKeyRef = React.useRef<string | null>(null);
-  if (!sessionKeyRef.current) {
-    sessionKeyRef.current = `checkout-${Math.random().toString(36).substring(2, 9)}-${Date.now()}`;
-  }
-  const effectiveIdempotencyKey = idempotencyKey || sessionKeyRef.current;
+  // Maintain a stable fallback session key across retries if not provided by review modal
+  const fallbackKeyRef = React.useRef<string | null>(null);
 
   const clientId = process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID || "";
 
@@ -56,12 +52,18 @@ export function PayPalCheckoutButton({
     setIsProcessing(true);
     setErrorMessage(null);
 
+    // Initialize stable fallback key on first attempt if none provided by parent
+    if (!fallbackKeyRef.current) {
+      fallbackKeyRef.current = `checkout-${Math.random().toString(36).substring(2, 9)}-${Date.now()}`;
+    }
+    const keyToUse = idempotencyKey || fallbackKeyRef.current;
+
     try {
       const response = await fetch("/api/checkout/create-order", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          idempotencyKey: effectiveIdempotencyKey,
+          idempotencyKey: keyToUse,
         }),
       });
 

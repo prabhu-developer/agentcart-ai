@@ -81,6 +81,7 @@ export function ShoppingWorkspace() {
     ): Promise<{
       text: string;
       type: "recommendation" | "clarification" | "message" | "error";
+      source?: "ai" | "fallback" | "clarification";
       products?: Product[];
       comparison?: Product[];
       budget?: ChatMessage["budgetAnalysis"];
@@ -102,6 +103,7 @@ export function ShoppingWorkspace() {
         return {
           text: result.message,
           type: result.type,
+          source: result.source || "ai",
           products: result.recommendedProducts,
           comparison: result.comparisonProducts,
           budget: result.budgetAnalysis,
@@ -115,6 +117,7 @@ export function ShoppingWorkspace() {
         return {
           text: fallback.text,
           type: "recommendation",
+          source: "fallback",
           products: fallback.products,
           comparison: fallback.comparison,
           budget: fallback.budget,

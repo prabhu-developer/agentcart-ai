@@ -21,6 +21,7 @@ export interface AgentResponse {
   success: boolean;
   type: AgentResponseType;
   message: string;
+  source?: "ai" | "fallback" | "clarification";
   recommendedProducts?: Product[];
   comparisonProducts?: Product[];
   budgetAnalysis?: BudgetAnalysis;

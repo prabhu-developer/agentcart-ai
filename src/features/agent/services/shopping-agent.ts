@@ -37,6 +37,7 @@ export async function runShoppingAgent(
     return {
       success: true,
       type: "clarification",
+      source: "clarification",
       message:
         requirements.clarificationQuestion ||
         "I'm your personal shopping assistant. Tell me what you'd like to find, your budget, or choose from one of our popular setups below:",
@@ -46,6 +47,7 @@ export async function runShoppingAgent(
     };
   }
 
+  let executionSource: "ai" | "fallback" = "ai";
   const toolsCalled: string[] = [];
   const discoveredProductIds = new Set<string>();
   let calculatedBudget: BudgetAnalysis | undefined = undefined;
@@ -161,6 +163,7 @@ export async function runShoppingAgent(
       }
     }
   } catch (llmError) {
+    executionSource = "fallback";
     // If OpenRouter call times out or throws, we log and fall back to our deterministic pipeline
     console.warn("OpenRouter tool loop encountered an error, activating deterministic fallback:", llmError);
   }
@@ -168,6 +171,7 @@ export async function runShoppingAgent(
   // --- DETERMINISTIC FALLBACK PIPELINE ---
   // If the model did not execute any tools, or did not discover products for a shopping query:
   if (discoveredProductIds.size === 0) {
+    executionSource = "fallback";
     // 1. Search products for detected needs
     const searchTerms =
       requirements.detectedNeeds.length > 0
@@ -297,6 +301,7 @@ export async function runShoppingAgent(
   return {
     success: true,
     type: responseType,
+    source: executionSource,
     message: assistantText,
     recommendedProducts: verifiedProducts,
     comparisonProducts: comparisonProducts.length > 0 ? comparisonProducts : undefined,
