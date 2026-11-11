@@ -31,10 +31,6 @@ export function CartDrawer() {
     items,
     totalItems,
     formattedSubtotal,
-    subtotal,
-    estimatedShipping,
-    estimatedTax,
-    formattedTotal,
     isCartOpen,
     closeCart,
     clearCart,
@@ -48,10 +44,6 @@ export function CartDrawer() {
   const [prepResult, setPrepResult] = useState<CheckoutPreparation | null>(null);
   const [confirmedOrder, setConfirmedOrder] = useState<ConfirmedOrderDTO | null>(null);
   const [checkoutAttemptKey, setCheckoutAttemptKey] = useState<string>("");
-
-  const freeShippingThreshold = 50;
-  const progressToFreeShipping = Math.min(100, (subtotal / freeShippingThreshold) * 100);
-  const remainingForFreeShipping = Math.max(0, freeShippingThreshold - subtotal);
 
   const handleProceedToReview = async () => {
     setIsValidating(true);
@@ -108,39 +100,15 @@ export function CartDrawer() {
                 )}
               </div>
               <SheetDescription className="text-xs text-[#727b76]">
-                Server-validated cart items backed by real-time MongoDB inventory.
+                Review your items before checkout.
               </SheetDescription>
-
-              {/* Free shipping banner */}
-              {items.length > 0 && (
-                <div className="mt-3 rounded-lg border border-[#e8ece9] bg-[#f8faf9] p-2.5 text-xs text-[#202522]">
-                  <div className="flex items-center justify-between text-[11px] font-medium text-[#727b76]">
-                    <span>
-                      {subtotal >= freeShippingThreshold ? (
-                        <span className="font-semibold text-[#0f766e]">
-                          ✓ Qualified for Free Standard Shipping!
-                        </span>
-                      ) : (
-                        `Add $${remainingForFreeShipping.toFixed(2)} more for Free Shipping`
-                      )}
-                    </span>
-                    <span>{Math.round(progressToFreeShipping)}%</span>
-                  </div>
-                  <div className="mt-1.5 h-1.5 w-full overflow-hidden rounded-full bg-[#e8ece9]">
-                    <div
-                      className="h-full bg-[#0f766e] transition-all duration-300"
-                      style={{ width: `${progressToFreeShipping}%` }}
-                    />
-                  </div>
-                </div>
-              )}
 
               {/* Active Cart Validation Issues Alert */}
               {validationIssues.length > 0 && (
                 <div className="mt-3 rounded-lg border border-amber-200 bg-amber-50 p-2.5 text-xs text-amber-900">
                   <div className="flex items-center gap-1.5 font-semibold text-amber-800">
                     <AlertTriangle className="size-3.5" />
-                    <span>Cart Inventory Notices:</span>
+                    <span>Cart Notices</span>
                   </div>
                   <ul className="mt-1 list-disc pl-4 space-y-0.5 text-[11px] text-amber-700">
                     {validationIssues.map((issue, idx) => (
@@ -185,28 +153,22 @@ export function CartDrawer() {
             {/* Footer Summary */}
             {items.length > 0 && (
               <SheetFooter className="border-t border-[#e8ece9] bg-[#f8faf9] p-6">
-                <div className="w-full space-y-2 text-xs text-[#727b76]">
+                <div className="w-full space-y-2.5 text-xs text-[#6b7470]">
                   <div className="flex justify-between">
-                    <span>Authoritative Subtotal</span>
-                    <span className="font-semibold text-[#202522]">{formattedSubtotal}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>Estimated Shipping</span>
-                    <span className="font-medium text-[#202522]">
-                      {estimatedShipping === 0 ? (
-                        <span className="text-[#0f766e]">FREE</span>
-                      ) : (
-                        `$${estimatedShipping.toFixed(2)}`
-                      )}
+                    <span>Subtotal</span>
+                    <span className="font-medium tabular-nums text-[#181c1a]">
+                      {formattedSubtotal}
                     </span>
                   </div>
                   <div className="flex justify-between">
-                    <span>Estimated Tax (8%)</span>
-                    <span className="font-medium text-[#202522]">${estimatedTax.toFixed(2)}</span>
+                    <span>Shipping</span>
+                    <span className="font-medium text-[#0f766e]">Free</span>
                   </div>
-                  <div className="flex justify-between border-t border-[#e8ece9] pt-2 text-sm font-semibold text-[#202522]">
-                    <span>Estimated Total</span>
-                    <span className="text-base text-[#0f766e]">{formattedTotal}</span>
+                  <div className="flex justify-between border-t border-[#e8ece9] pt-2.5 text-sm font-semibold text-[#181c1a]">
+                    <span>Total</span>
+                    <span className="text-base tabular-nums text-[#0f766e]">
+                      {formattedSubtotal}
+                    </span>
                   </div>
 
                   <div className="pt-2">
@@ -219,7 +181,7 @@ export function CartDrawer() {
                       {isValidating ? (
                         <>
                           <Sparkles className="size-4 animate-spin" />
-                          <span>Validating with MongoDB...</span>
+                          <span>Preparing review...</span>
                         </>
                       ) : (
                         <>
@@ -232,7 +194,7 @@ export function CartDrawer() {
 
                   <div className="flex items-center justify-center gap-1.5 pt-1 text-[11px] text-[#727b76]">
                     <ShieldCheck className="size-3.5 text-[#0f766e]" />
-                    <span>Server-authoritative cart with minor-unit precision</span>
+                    <span>Verified pricing at checkout</span>
                   </div>
                 </div>
               </SheetFooter>
@@ -326,11 +288,11 @@ export function CartDrawer() {
                     <div>
                       <h3 className="text-base font-bold text-[#202522]">
                         {prepResult.isValid
-                          ? "Validated Checkout Review"
+                          ? "Order Review"
                           : "Cart Requires Attention"}
                       </h3>
                       <p className="text-xs text-[#727b76]">
-                        Pre-checkout verification via MongoDB backend service
+                        Confirm your items before payment.
                       </p>
                     </div>
                   </div>
@@ -391,8 +353,8 @@ export function CartDrawer() {
                     </span>
                   </div>
                   <div className="flex justify-between text-[11px] text-[#727b76]">
-                    <span>Tax & Shipping</span>
-                    <span className="italic">$0.00 (not currently charged)</span>
+                    <span>Shipping & Tax</span>
+                    <span className="font-medium text-[#0f766e]">Free</span>
                   </div>
                   <div className="flex justify-between border-t border-[#e8ece9] pt-1.5 font-bold text-[#202522]">
                     <span>Final Checkout Total</span>

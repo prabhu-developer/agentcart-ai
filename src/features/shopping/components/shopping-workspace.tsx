@@ -28,6 +28,7 @@ import { CartDrawer } from "./cart-drawer";
 import { ChatComposer } from "./chat-composer";
 import { ChatMessageItem } from "./chat-message-item";
 import { ProductComparisonModal } from "./product-comparison-modal";
+import { ProductDetailsDialog } from "./product-details-dialog";
 import { ShoppingSidebar } from "./shopping-sidebar";
 
 let messageSeq = 0;
@@ -57,7 +58,7 @@ export function ShoppingWorkspace() {
   const [selectedCategory, setSelectedCategory] = useState<string>(initialCategory);
   const [activeSessionId, setActiveSessionId] = useState<string>("session-1");
   const [sessionTitle, setSessionTitle] = useState(() =>
-    initialQuery ? initialQuery : "Home Office Setup Under $1,000"
+    initialQuery ? initialQuery : "Home Office Setup"
   );
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [isTyping, setIsTyping] = useState(false);
@@ -165,7 +166,7 @@ export function ShoppingWorkspace() {
       } else {
         // Load initial home office setup
         const defaultPrompt =
-          "I need a complete home office setup under $1,000. I need a monitor, keyboard, mouse and ergonomic chair. Prioritize quality, reliability and value for money.";
+          "Home office setup under $1,000 with a monitor, keyboard, mouse, and chair.";
 
         const rec = await queryAiShoppingAgent(defaultPrompt);
         if (isCancelled) return;
@@ -402,18 +403,9 @@ export function ShoppingWorkspace() {
             <div>
               <div className="flex items-center gap-2">
                 <h1 className="text-sm font-bold text-[#202522] truncate max-w-xs sm:max-w-md">
-                  {activeView === "chat" ? sessionTitle : "MongoDB Live Catalog"}
+                  {activeView === "chat" ? sessionTitle : "Catalog"}
                 </h1>
-                <span className="hidden items-center gap-1 rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-semibold text-emerald-700 sm:inline-flex">
-                  <span className="size-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                  AI Agent Connected
-                </span>
               </div>
-              <p className="hidden text-[11px] text-[#727b76] sm:block">
-                {activeView === "chat"
-                  ? "OpenRouter LLM · Real-time Catalog Queries & Budget Optimization"
-                  : "Explore 24 Products · Search, Filters, and Sorting"}
-              </p>
             </div>
           </div>
 
@@ -498,16 +490,12 @@ export function ShoppingWorkspace() {
               <div className="mx-auto max-w-4xl">
                 {messages.length === 0 ? (
                   /* Empty State when opening fresh session */
-                  <div className="flex flex-col items-center justify-center py-16 text-center">
-                    <div className="flex size-14 items-center justify-center rounded-2xl bg-[#eaf5f2] text-[#0f766e] shadow-xs">
-                      <Sparkles className="size-7" />
-                    </div>
-
-                    <h2 className="mt-5 text-2xl font-bold tracking-tight text-[#202522]">
-                      Let&apos;s find exactly what you need.
+                  <div className="flex flex-col items-center justify-center py-20 text-center">
+                    <h2 className="text-2xl font-semibold tracking-tight text-[#181c1a]">
+                      What are you shopping for?
                     </h2>
-                    <p className="mt-2 max-w-md text-sm leading-relaxed text-[#727b76]">
-                      Tell me what you&apos;re shopping for, your budget, and what matters most. Our AI assistant checks live inventory, calculates budgets, and matches real MongoDB products.
+                    <p className="mt-2 max-w-md text-sm text-[#6b7470]">
+                      Share your setup and budget for curated recommendations.
                     </p>
 
                     <div className="mt-8 w-full max-w-xl">
@@ -547,16 +535,13 @@ export function ShoppingWorkspace() {
                           <Sparkles className="size-4 animate-spin" />
                         </div>
                         <div className="rounded-2xl border border-[#e8ece9] bg-white px-4 py-3 text-xs text-[#727b76] shadow-xs">
-                          <div className="flex items-center gap-2">
-                            <span className="font-semibold text-[#202522]">
-                              AgentCart AI Assistant
+                          <div className="flex items-center gap-2 text-xs text-[#6b7470]">
+                            <span>Curating picks</span>
+                            <span className="flex gap-1">
+                              <span className="size-1 rounded-full bg-[#0f766e] animate-bounce" />
+                              <span className="size-1 rounded-full bg-[#0f766e] animate-bounce [animation-delay:0.2s]" />
+                              <span className="size-1 rounded-full bg-[#0f766e] animate-bounce [animation-delay:0.4s]" />
                             </span>
-                            <span>is evaluating catalog tools and verifying live inventory...</span>
-                          </div>
-                          <div className="mt-2 flex gap-1">
-                            <span className="size-1.5 rounded-full bg-[#0f766e] animate-bounce" />
-                            <span className="size-1.5 rounded-full bg-[#0f766e] animate-bounce [animation-delay:0.2s]" />
-                            <span className="size-1.5 rounded-full bg-[#0f766e] animate-bounce [animation-delay:0.4s]" />
                           </div>
                         </div>
                       </div>
@@ -578,7 +563,8 @@ export function ShoppingWorkspace() {
         )}
       </main>
 
-      {/* Product Comparison Matrix Drawer */}
+      {/* Product Details & Comparison Modals */}
+      <ProductDetailsDialog />
       <ProductComparisonModal />
 
       {/* Shopping Cart Drawer */}

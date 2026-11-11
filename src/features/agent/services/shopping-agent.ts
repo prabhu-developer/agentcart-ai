@@ -282,16 +282,12 @@ export async function runShoppingAgent(
   if (!assistantText || assistantText.trim().length === 0) {
     if (verifiedProducts.length > 0) {
       const budgetPhrase = budgetAnalysis
-        ? ` with a verified total of $${budgetAnalysis.total.toFixed(
-            2
-          )} (saving $${budgetAnalysis.difference.toFixed(2)} under your $${
-            budgetAnalysis.budget
-          } target)`
+        ? ` — $${budgetAnalysis.total.toFixed(2)} total ($${budgetAnalysis.difference.toFixed(2)} under budget)`
         : "";
 
-      assistantText = `I analyzed your request and queried our real MongoDB catalog. Here is a curated set of ${verifiedProducts.length} verified products${budgetPhrase}. All prices and inventory are confirmed live.`;
+      assistantText = `Selected ${verifiedProducts.length} pieces tailored to your setup${budgetPhrase}.`;
     } else {
-      assistantText = `I searched our catalog for "${userText}", but couldn't find matching active items. Try searching for "ergonomic chair", "mechanical keyboard", or "home office setup".`;
+      assistantText = `No exact matches for "${userText}". Try asking for an ergonomic chair, 4K monitor, or home office setup.`;
     }
   }
 
@@ -309,8 +305,8 @@ export async function runShoppingAgent(
     toolsCalled,
     suggestedQueries: [
       "Compare key specifications",
-      "Are there more affordable alternatives?",
-      "Add recommended bundle to cart",
+      "Show more affordable alternatives",
+      "Focus on essential items only",
     ],
   };
 }

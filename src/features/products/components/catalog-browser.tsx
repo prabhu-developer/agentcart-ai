@@ -116,7 +116,7 @@ export function CatalogBrowser({
                 setSearch(e.target.value);
                 setPage(1);
               }}
-              placeholder="Search by name, spec, or SKU in MongoDB..."
+              placeholder="Search products, specs, or categories..."
               className="h-10 w-full rounded-xl border border-[#e8ece9] bg-white pl-10 pr-4 text-xs text-[#202522] placeholder:text-[#727b76] outline-none transition-colors focus:border-[#0f766e] focus:ring-2 focus:ring-[#0f766e]/15"
             />
           </div>
@@ -203,7 +203,7 @@ export function CatalogBrowser({
         <div className="flex items-center gap-1.5">
           <Database className="size-3.5 text-[#0f766e]" />
           <span>
-            Connected to <strong>MongoDB Catalog</strong> · {totalItems} total active products
+            {totalItems} {totalItems === 1 ? "product" : "products"}
           </span>
         </div>
         {totalPages > 1 && (

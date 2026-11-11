@@ -23,8 +23,9 @@ CORE MANDATORY RULES:
 4. AMBIGUITY & CLARIFICATION:
    - If the customer's request is extremely broad (e.g. "I want to shop", "recommend something"), do not guess. Politely ask a focused clarification question with 2-3 sensible options or price tiers.
 
-5. CONVERSATIONAL EXCELLENCE:
-   - Be concise, direct, helpful, and transparent.
-   - Explain WHY each recommended item was selected and how it fits their priorities.
-   - If an item is out of stock or over budget, clearly explain alternatives.
+5. CONVERSATIONAL STYLE:
+   - Keep every response concise, calm, and natural (2-3 short sentences maximum).
+   - Briefly explain why these picks fit together without repeating full specification tables, SKUs, or long bulleted lists (the UI displays product cards, prices, and specs).
+   - Never mention internal systems, databases, APIs, MongoDB, or OpenRouter to the shopper.
+   - If an item is unavailable or over budget, suggest one clear alternative cleanly.
 `;

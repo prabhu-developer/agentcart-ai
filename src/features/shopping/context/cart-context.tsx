@@ -1,29 +1,29 @@
 "use client";
 
-import React, {
-  createContext,
-  useContext,
-  useState,
-  useEffect,
-  useCallback,
-  useMemo,
-  useRef,
-} from "react";
-import { toast } from "sonner";
-import { CartItem, Product } from "../types";
 import {
-  fetchCart,
   apiAddToCart,
-  apiUpdateQuantity,
-  apiRemoveItem,
-  apiClearCart,
   apiBulkAddToCart,
+  apiClearCart,
+  apiRemoveItem,
+  apiUpdateQuantity,
   apiValidateCheckout,
+  fetchCart,
 } from "@/features/cart/services/cart-client";
 import {
   AuthoritativeCart,
   CheckoutPreparation,
 } from "@/features/cart/types";
+import React, {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
+import { toast } from "sonner";
+import { CartItem, Product } from "../types";
 
 interface CartContextValue {
   items: CartItem[];
@@ -55,12 +55,16 @@ interface CartContextValue {
   closeCart: () => void;
   toggleCart: () => void;
   toggleCompare: (product: Product) => void;
+  compareProductsBatch: (products: Product[]) => void;
   removeFromCompare: (productId: string) => void;
   clearCompare: () => void;
   openCompareModal: () => void;
   closeCompareModal: () => void;
   isInCompare: (productId: string) => boolean;
   isInCart: (productId: string) => boolean;
+  selectedProductForDetails: Product | null;
+  openProductDetails: (product: Product) => void;
+  closeProductDetails: () => void;
 }
 
 const CartContext = createContext<CartContextValue | null>(null);
@@ -75,6 +79,8 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [comparingProducts, setComparingProducts] = useState<Product[]>([]);
   const [isCompareModalOpen, setIsCompareModalOpen] = useState(false);
+  const [selectedProductForDetails, setSelectedProductForDetails] =
+    useState<Product | null>(null);
 
   // Stale response protection
   const latestMutationSeq = useRef(0);
@@ -169,7 +175,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         applyAuthoritativeCart(updated);
       }
       toast.success(`Added ${product.name} to cart`, {
-        description: `$${product.price.toFixed(2)} · Verified stock from MongoDB`,
+        description: `$${product.price.toFixed(2)}`,
         action: {
           label: "View Cart",
           onClick: () => setIsCartOpen(true),
@@ -194,8 +200,8 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       if (seq === latestMutationSeq.current) {
         applyAuthoritativeCart(updated);
       }
-      toast.success(`Added all ${bulkItems.length} items to your cart`, {
-        description: "Entire setup verified with live stock and pricing.",
+      toast.success(`Added ${bulkItems.length} items to cart`, {
+        description: "Ready in your cart.",
         action: {
           label: "View Cart",
           onClick: () => setIsCartOpen(true),
@@ -275,7 +281,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  // Product Comparison state (preserved from Phase 01)
+  // Product Comparison & Details state
   const toggleCompare = (product: Product) => {
     setComparingProducts((prev) => {
       const exists = prev.some((p) => p.id === product.id);
@@ -283,19 +289,26 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         return prev.filter((p) => p.id !== product.id);
       }
       if (prev.length >= 4) {
-        toast.warning("Comparison limit reached", {
-          description: "You can compare up to 4 products at the same time.",
-        });
+        toast.warning("Up to 4 items can be compared at once");
         return prev;
       }
-      toast.info(`Added ${product.name} to comparison`, {
+      toast.info(`Added ${product.name} to compare`, {
         action: {
-          label: "View Comparison",
+          label: "Compare",
           onClick: () => setIsCompareModalOpen(true),
         },
       });
       return [...prev, product];
     });
+  };
+
+  const compareProductsBatch = (products: Product[]) => {
+    const unique = products.filter(
+      (item, idx, arr) => arr.findIndex((other) => other.id === item.id) === idx
+    );
+    if (unique.length === 0) return;
+    setComparingProducts(unique.slice(0, 4));
+    setIsCompareModalOpen(true);
   };
 
   const removeFromCompare = (productId: string) => {
@@ -342,12 +355,16 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     closeCart: () => setIsCartOpen(false),
     toggleCart: () => setIsCartOpen((prev) => !prev),
     toggleCompare,
+    compareProductsBatch,
     removeFromCompare,
     clearCompare,
     openCompareModal: () => setIsCompareModalOpen(true),
     closeCompareModal: () => setIsCompareModalOpen(false),
     isInCompare,
     isInCart,
+    selectedProductForDetails,
+    openProductDetails: (product: Product) => setSelectedProductForDetails(product),
+    closeProductDetails: () => setSelectedProductForDetails(null),
   };
 
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>;

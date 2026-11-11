@@ -70,12 +70,12 @@ export function extractShoppingRequirements(userText: string): ShoppingRequireme
       priorities: [],
       isClarificationNeeded: true,
       clarificationQuestion:
-        "What are you looking to buy today? Tell me what equipment you need or pick one of these popular setups:",
+        "What are you shopping for today?",
       clarificationOptions: [
-        "Complete Home Office Setup (Under $1,000)",
-        "Premium Mechanical Keyboards & Mice",
-        "Noise-Cancelling Audio & Headphones",
-        "Ergonomic Seating & Standing Desks",
+        "Home office setup under $1,000",
+        "Mechanical keyboards & mice",
+        "Noise-cancelling headphones",
+        "Ergonomic chair & desk",
       ],
     });
   }

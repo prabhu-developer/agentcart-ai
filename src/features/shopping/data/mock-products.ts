@@ -319,13 +319,13 @@ export const MOCK_PRODUCTS: Product[] = [
 export const MOCK_SCENARIOS: ShoppingScenario[] = [
   {
     id: "scenario-home-office",
-    title: "Home Office Setup Under $1,000",
-    tagline: "Productivity & Ergonomics",
-    description: "Curated 5-piece setup designed for software engineers, designers, and remote professionals needing comfort and high output.",
+    title: "Home Office Setup",
+    tagline: "Under $1,000",
+    description: "QHD display, mechanical keyboard, precision mouse, USB-C hub, and ergonomic seating.",
     targetBudget: 1000,
     image: "https://images.unsplash.com/photo-1527443224154-c4a3942d3acf?w=1200&auto=format&fit=crop&q=85",
     category: "Workspace",
-    prompt: "I need a complete home office setup under $1,000. I need a monitor, keyboard, mouse, USB-C hub, and an ergonomic chair. Prioritize quality, reliability, and value.",
+    prompt: "Home office setup under $1,000 with a monitor, keyboard, mouse, USB-C hub, and ergonomic chair.",
     featuredProducts: [
       MOCK_PRODUCTS[0], // StudioView 27
       MOCK_PRODUCTS[1], // Keychron K2
@@ -336,13 +336,13 @@ export const MOCK_SCENARIOS: ShoppingScenario[] = [
   },
   {
     id: "scenario-creative-pro",
-    title: "Creative & Coding Workstation",
-    tagline: "4K Clarity & Precision Audio",
-    description: "Color-accurate 4K display, high-precision tactile input, and active noise isolation for focused creative deep-work sessions.",
+    title: "Creative Studio",
+    tagline: "Under $750",
+    description: "Color-accurate 4K monitor paired with quiet wireless controls and hybrid ANC audio.",
     targetBudget: 750,
     image: "https://images.unsplash.com/photo-1587829741301-dc798b83add3?w=1200&auto=format&fit=crop&q=85",
     category: "Creative",
-    prompt: "Recommend a creative workstation setup under $750 with a 4K color-accurate monitor, quiet input devices, and studio ANC headphones.",
+    prompt: "Creative workstation under $750 with a 4K color-accurate monitor, quiet keyboard and mouse, and ANC headphones.",
     featuredProducts: [
       MOCK_PRODUCTS[5], // VisionPro 4K
       MOCK_PRODUCTS[1], // Keychron K2
@@ -352,13 +352,13 @@ export const MOCK_SCENARIOS: ShoppingScenario[] = [
   },
   {
     id: "scenario-travel-essentials",
-    title: "Remote Worker Travel Kit",
-    tagline: "Portability & Power",
-    description: "Packable tech gear to work efficiently from anywhere in the world without hauling heavy equipment.",
+    title: "Remote Travel Kit",
+    tagline: "Under $350",
+    description: "Weatherproof clamshell carry, noise-cancelling headphones, and 8-in-1 travel hub.",
     targetBudget: 350,
     image: "https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=1200&auto=format&fit=crop&q=85",
     category: "Travel",
-    prompt: "Plan my travel essentials under $350. I need a modular backpack, noise cancelling headphones, and a reliable multi-port USB hub.",
+    prompt: "Remote travel essentials under $350 with a backpack, noise-cancelling headphones, and USB-C hub.",
     featuredProducts: [
       MOCK_PRODUCTS[8], // Voyage Bag
       MOCK_PRODUCTS[6], // AudioCraft ANC
@@ -367,13 +367,13 @@ export const MOCK_SCENARIOS: ShoppingScenario[] = [
   },
   {
     id: "scenario-desk-upgrade",
-    title: "Everyday Tech Desk Refresh",
-    tagline: "Minimal & Functional",
-    description: "Elevate your existing desk with premium tactile peripherals, intelligent lighting, and an ergonomic pointer.",
+    title: "Everyday Desk",
+    tagline: "Under $300",
+    description: "Tactile wireless peripherals and eye-caring task lighting for a calmer workspace.",
     targetBudget: 300,
     image: "https://images.unsplash.com/photo-1507473885765-e6ed057f782c?w=1200&auto=format&fit=crop&q=85",
     category: "Lifestyle",
-    prompt: "Upgrade my everyday tech desk setup under $300 with a mechanical keyboard, wireless mouse, and a minimalist eye-caring desk lamp.",
+    prompt: "Upgrade my everyday desk under $300 with a mechanical keyboard, wireless mouse, and minimalist desk lamp.",
     featuredProducts: [
       MOCK_PRODUCTS[1], // Keychron K2
       MOCK_PRODUCTS[2], // MX Master 3S
@@ -385,35 +385,35 @@ export const MOCK_SCENARIOS: ShoppingScenario[] = [
 export const MOCK_RECENT_SESSIONS: ShoppingSession[] = [
   {
     id: "session-1",
-    title: "Home Office Setup Under $1,000",
-    preview: "5 items · Monitor, Keychron K2, MX Master 3S, Chair, Hub",
+    title: "Home Office Under $1,000",
+    preview: "5 pieces",
     updatedAt: "Just now",
     itemCount: 5,
-    initialPrompt: "I need a complete home office setup under $1,000. I need a monitor, keyboard, mouse and ergonomic chair. Prioritize quality, reliability and value for money.",
+    initialPrompt: "Home office setup under $1,000 with a monitor, keyboard, mouse, and ergonomic chair.",
   },
   {
     id: "session-2",
-    title: "Creative 4K Workspace",
-    preview: "4 items · VisionPro 4K, AudioCraft ANC, MX Master 3S",
+    title: "Creative 4K Studio",
+    preview: "4 pieces",
     updatedAt: "2 days ago",
     itemCount: 4,
-    initialPrompt: "Recommend a creative workstation setup under $750 with a 4K color-accurate monitor, quiet input devices, and studio ANC headphones.",
+    initialPrompt: "Creative workstation under $750 with a 4K monitor, quiet peripherals, and ANC headphones.",
   },
   {
     id: "session-3",
-    title: "Remote Travel Essentials",
-    preview: "3 items · Tech Backpack, ANC Headphones, Multi-Hub",
+    title: "Remote Travel Kit",
+    preview: "3 pieces",
     updatedAt: "Last week",
     itemCount: 3,
-    initialPrompt: "Plan my travel essentials under $350. I need a modular backpack, noise cancelling headphones, and a reliable multi-port USB hub.",
+    initialPrompt: "Remote travel essentials under $350 with a backpack, ANC headphones, and USB-C hub.",
   },
 ];
 
 export const MOCK_EXAMPLE_PROMPTS = [
-  "Build my home office under $1,000",
-  "Find the best gaming setup for my budget",
-  "Plan my travel essentials for remote work",
-  "Upgrade my everyday desk tech with premium gear",
+  "Home office under $1,000",
+  "4K creative desk under $750",
+  "Remote travel essentials under $350",
+  "Minimal everyday desk upgrade",
 ];
 
 export function getMockResponseForPrompt(promptText: string) {
@@ -423,7 +423,7 @@ export function getMockResponseForPrompt(promptText: string) {
     const products = [MOCK_PRODUCTS[8], MOCK_PRODUCTS[6], MOCK_PRODUCTS[3]];
     const total = products.reduce((acc, p) => acc + p.price, 0);
     return {
-      text: "Here is a balanced travel and remote mobility setup. Every item is compact, resilient, and keeps your mobile workstation organized across flights, cafes, and co-working spaces.",
+      text: "A compact travel setup built around durability, active noise cancellation, and single-hub connectivity.",
       products,
       comparison: [MOCK_PRODUCTS[6], MOCK_PRODUCTS[8]],
       budget: {
@@ -440,7 +440,7 @@ export function getMockResponseForPrompt(promptText: string) {
     const products = [MOCK_PRODUCTS[5], MOCK_PRODUCTS[1], MOCK_PRODUCTS[2], MOCK_PRODUCTS[6]];
     const total = products.reduce((acc, p) => acc + p.price, 0);
     return {
-      text: "I have curated a specialized creative workstation setup. The centerpiece is the VisionPro 27 4K display with 99% DCI-P3 color accuracy, paired with silent tactile controls and hybrid ANC audio for deep focus.",
+      text: "A color-accurate 4K workstation paired with quiet tactile controls and hybrid ANC audio.",
       products,
       comparison: [MOCK_PRODUCTS[0], MOCK_PRODUCTS[5]],
       budget: {
@@ -457,7 +457,7 @@ export function getMockResponseForPrompt(promptText: string) {
     const products = [MOCK_PRODUCTS[1], MOCK_PRODUCTS[2], MOCK_PRODUCTS[7]];
     const total = products.reduce((acc, p) => acc + p.price, 0);
     return {
-      text: "Here is an everyday desk upgrade package. It focuses on your most frequent daily touchpoints: mechanical typing comfort, wrist fatigue reduction, and high-CRI flicker-free illumination.",
+      text: "A focused desk upgrade prioritizing typing feel, wrist comfort, and balanced lighting.",
       products,
       comparison: [MOCK_PRODUCTS[1], MOCK_PRODUCTS[2]],
       budget: {
@@ -481,7 +481,7 @@ export function getMockResponseForPrompt(promptText: string) {
   const total = products.reduce((acc, p) => acc + p.price, 0); // 769.95
 
   return {
-    text: "I analyzed your requirements for a comprehensive home office setup. I prioritized build quality, ergonomic posture, and high value for money. Here is an optimized 5-piece recommendation that remains comfortably under your $1,000 budget.",
+    text: "A balanced 5-piece home office setup combining ergonomics, crisp QHD clarity, and lasting comfort well under $1,000.",
     products,
     comparison: [MOCK_PRODUCTS[0], MOCK_PRODUCTS[5]],
     budget: {

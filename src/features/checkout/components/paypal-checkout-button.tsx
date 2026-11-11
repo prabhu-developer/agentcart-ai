@@ -147,7 +147,7 @@ export function PayPalCheckoutButton({
       {isProcessing && (
         <div className="flex items-center justify-center gap-2 rounded-xl border border-[#0f766e]/20 bg-[#eaf5f2] py-2 text-xs font-medium text-[#0f766e]">
           <Sparkles className="size-3.5 animate-spin" />
-          <span>Processing secure server-side capture...</span>
+          <span>Completing payment...</span>
         </div>
       )}
 
@@ -179,7 +179,7 @@ export function PayPalCheckoutButton({
 
       <div className="flex items-center justify-center gap-1 text-[11px] text-[#727b76]">
         <ShieldCheck className="size-3.5 text-[#0f766e]" />
-        <span>Official PayPal REST Orders API v2 · Encrypted TLS</span>
+        <span>Secured by PayPal Sandbox</span>
       </div>
     </div>
   );

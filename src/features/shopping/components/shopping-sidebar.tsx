@@ -1,276 +1,192 @@
 "use client";
 
-import React from "react";
 import Link from "next/link";
 import {
-  Sparkles,
-  PlusCircle,
+  LayoutGrid,
   MessageSquare,
-  ShoppingBag,
-  SlidersHorizontal,
-  Monitor,
-  Keyboard,
-  Headphones,
-  Armchair,
-  Database,
-  User,
+  Plus,
   RotateCcw,
+  Scale,
+  ShoppingBag,
 } from "lucide-react";
-import { MOCK_RECENT_SESSIONS } from "../data/mock-products";
-import { useShoppingCart } from "../context/cart-context";
+import { MOCK_RECENT_SESSIONS } from "@/features/shopping/data/mock-products";
+import { useShoppingCart } from "@/features/shopping/context/cart-context";
 
 interface ShoppingSidebarProps {
-  activeSessionId: string;
+  activeSessionId?: string;
   onSelectSession: (sessionId: string) => void;
   onNewSession: () => void;
-  onResetDemo?: () => void;
-  activeView?: "chat" | "catalog";
-  onSelectView?: (view: "chat" | "catalog") => void;
+  onResetDemo: () => void;
+  activeView: "chat" | "catalog";
+  onSelectView: (view: "chat" | "catalog") => void;
   onSelectCategory?: (category: string) => void;
   className?: string;
 }
+
+const CATEGORIES = [
+  { id: "all", label: "All Products" },
+  { id: "workspace", label: "Workspace" },
+  { id: "electronics", label: "Displays & Hubs" },
+  { id: "audio", label: "Audio" },
+  { id: "furniture", label: "Seating" },
+  { id: "lifestyle", label: "Lifestyle" },
+];
 
 export function ShoppingSidebar({
   activeSessionId,
   onSelectSession,
   onNewSession,
   onResetDemo,
-  activeView = "chat",
+  activeView,
   onSelectView,
   onSelectCategory,
-  className,
+  className = "",
 }: ShoppingSidebarProps) {
-  const { totalItems, formattedSubtotal, toggleCart, comparingProducts, openCompareModal } =
-    useShoppingCart();
+  const {
+    totalItems,
+    formattedSubtotal,
+    openCart,
+    comparingProducts,
+    openCompareModal,
+  } = useShoppingCart();
 
   return (
     <aside
-      className={`flex h-full flex-col justify-between border-r border-[#e8ece9] bg-[#f8faf9] p-4 text-[#202522] ${
-        className || ""
-      }`}
+      className={`flex flex-col border-r border-[#eef1ef] bg-[#fcfdfc] ${className}`}
     >
-      <div className="flex flex-col gap-5 overflow-hidden">
-        {/* Brand header */}
-        <div className="flex items-center justify-between px-2 pt-1">
-          <Link href="/" className="flex items-center gap-2.5">
-            <div className="flex size-8 items-center justify-center rounded-xl bg-[#0f766e] text-white">
-              <Sparkles className="size-4" />
-            </div>
-            <div className="flex flex-col">
-              <span className="text-base font-bold tracking-tight text-[#202522]">
-                AgentCart
-              </span>
-              <span className="-mt-1 text-[10px] font-medium tracking-wider text-[#727b76]">
-                AI Commerce Space
-              </span>
-            </div>
-          </Link>
-        </div>
+      {/* Brand Header */}
+      <div className="flex items-center justify-between px-5 pt-5 pb-4">
+        <Link
+          href="/"
+          className="text-base font-semibold tracking-tight text-[#181c1a] transition-opacity hover:opacity-80"
+        >
+          AgentCart
+        </Link>
+        <button
+          type="button"
+          onClick={onResetDemo}
+          title="Reset session"
+          aria-label="Reset session"
+          className="flex size-7 cursor-pointer items-center justify-center rounded-full text-[#8a948f] transition-colors hover:bg-[#f1f4f2] hover:text-[#181c1a]"
+        >
+          <RotateCcw className="size-3.5" />
+        </button>
+      </div>
 
-        {/* Workspace Mode Switcher */}
-        <div className="grid grid-cols-2 gap-1 rounded-xl border border-[#e8ece9] bg-white p-1 text-xs font-semibold">
+      {/* Primary View Switch */}
+      <div className="px-4 pb-4">
+        <div className="grid grid-cols-2 rounded-xl bg-[#f1f4f2] p-1">
           <button
             type="button"
-            onClick={() => onSelectView?.("chat")}
-            className={`flex items-center justify-center gap-1.5 rounded-lg py-1.5 transition-all ${
+            onClick={() => onSelectView("chat")}
+            className={`flex cursor-pointer items-center justify-center gap-1.5 rounded-lg py-1.5 text-xs font-medium transition-all ${
               activeView === "chat"
-                ? "bg-[#0f766e] text-white shadow-xs"
-                : "text-[#727b76] hover:text-[#202522]"
+                ? "bg-white text-[#181c1a] shadow-xs"
+                : "text-[#6b7470] hover:text-[#181c1a]"
             }`}
           >
-            <Sparkles className="size-3.5" />
+            <MessageSquare className="size-3.5" />
             <span>Assistant</span>
           </button>
 
           <button
             type="button"
-            onClick={() => onSelectView?.("catalog")}
-            className={`flex items-center justify-center gap-1.5 rounded-lg py-1.5 transition-all ${
+            onClick={() => onSelectView("catalog")}
+            className={`flex cursor-pointer items-center justify-center gap-1.5 rounded-lg py-1.5 text-xs font-medium transition-all ${
               activeView === "catalog"
-                ? "bg-[#0f766e] text-white shadow-xs"
-                : "text-[#727b76] hover:text-[#202522]"
+                ? "bg-white text-[#181c1a] shadow-xs"
+                : "text-[#6b7470] hover:text-[#181c1a]"
             }`}
           >
-            <Database className="size-3.5" />
-            <span>Catalog (DB)</span>
+            <LayoutGrid className="size-3.5" />
+            <span>Catalog</span>
           </button>
         </div>
 
-        {/* New Session Action */}
-        <div className="flex flex-col gap-1.5">
-          <button
-            type="button"
-            onClick={onNewSession}
-            className="flex w-full items-center justify-center gap-2 rounded-xl border border-[#e8ece9] bg-white py-2 px-3 text-xs font-semibold text-[#0f766e] shadow-xs transition-colors hover:border-[#0f766e]/30 hover:bg-[#eaf5f2]"
-          >
-            <PlusCircle className="size-4" />
-            <span>New Shopping Session</span>
-          </button>
+        <button
+          type="button"
+          onClick={onNewSession}
+          className="mt-3 flex h-9 w-full cursor-pointer items-center justify-center gap-1.5 rounded-full border border-[#e3e8e5] bg-white text-xs font-medium text-[#181c1a] transition-colors hover:border-[#0f766e] hover:text-[#0f766e]"
+        >
+          <Plus className="size-3.5" />
+          <span>New search</span>
+        </button>
+      </div>
 
-          {onResetDemo && (
-            <button
-              type="button"
-              onClick={onResetDemo}
-              className="flex w-full items-center justify-center gap-1.5 rounded-xl border border-dashed border-[#e8ece9] bg-white/70 py-1.5 px-3 text-[11px] font-medium text-[#727b76] transition-colors hover:border-[#0f766e]/30 hover:bg-[#eaf5f2] hover:text-[#0f766e]"
-            >
-              <RotateCcw className="size-3" />
-              <span>Reset Demo State</span>
-            </button>
-          )}
-        </div>
-
-        {/* Recent Sessions List */}
-        <div className="flex flex-col gap-1 overflow-hidden">
-          <div className="flex items-center justify-between px-2">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-[#727b76]">
-              Recent Sessions
-            </span>
-          </div>
-
-          <div className="mt-1 flex flex-col gap-1 overflow-y-auto pr-1">
+      {/* Scrollable Navigation */}
+      <div className="flex-1 space-y-6 overflow-y-auto px-4 py-2">
+        <div>
+          <p className="px-2 pb-2 text-[11px] font-medium tracking-wider text-[#8a948f] uppercase">
+            Setups
+          </p>
+          <div className="space-y-1">
             {MOCK_RECENT_SESSIONS.map((session) => {
-              const isActive = activeView === "chat" && session.id === activeSessionId;
+              const isActive =
+                activeView === "chat" && activeSessionId === session.id;
               return (
                 <button
                   key={session.id}
                   type="button"
-                  onClick={() => {
-                    onSelectView?.("chat");
-                    onSelectSession(session.id);
-                  }}
-                  className={`flex flex-col rounded-xl p-2.5 text-left transition-colors ${
+                  onClick={() => onSelectSession(session.id)}
+                  className={`flex w-full cursor-pointer items-center justify-between rounded-xl px-3 py-2 text-left text-xs transition-colors ${
                     isActive
-                      ? "border border-[#0f766e]/20 bg-white shadow-xs text-[#202522]"
-                      : "text-[#727b76] hover:bg-white/60 hover:text-[#202522]"
+                      ? "bg-[#eaf5f2] font-medium text-[#0f766e]"
+                      : "text-[#4b544f] hover:bg-[#f3f6f4] hover:text-[#181c1a]"
                   }`}
                 >
-                  <div className="flex items-center gap-2">
-                    <MessageSquare
-                      className={`size-3.5 shrink-0 ${
-                        isActive ? "text-[#0f766e]" : "text-[#727b76]"
-                      }`}
-                    />
-                    <span className="truncate text-xs font-medium text-[#202522]">
-                      {session.title}
-                    </span>
-                  </div>
-                  <span className="mt-1 line-clamp-1 pl-5.5 text-[11px] text-[#727b76]">
-                    {session.preview}
-                  </span>
+                  <span className="truncate">{session.title}</span>
                 </button>
               );
             })}
           </div>
         </div>
 
-        {/* Category shortcuts */}
-        <div className="flex flex-col gap-1">
-          <span className="px-2 text-[10px] font-bold uppercase tracking-wider text-[#727b76]">
-            MongoDB Catalog
-          </span>
-          <div className="grid grid-cols-2 gap-1.5 pt-1 text-xs">
-            <button
-              type="button"
-              onClick={() => {
-                onSelectView?.("catalog");
-                onSelectCategory?.("workspace");
-              }}
-              className="flex items-center gap-2 rounded-lg border border-[#e8ece9] bg-white p-2 text-left text-[#727b76] transition-colors hover:text-[#202522]"
-            >
-              <Monitor className="size-3.5 text-[#0f766e]" />
-              <span className="text-[11px]">Displays</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                onSelectView?.("catalog");
-                onSelectCategory?.("workspace");
-              }}
-              className="flex items-center gap-2 rounded-lg border border-[#e8ece9] bg-white p-2 text-left text-[#727b76] transition-colors hover:text-[#202522]"
-            >
-              <Keyboard className="size-3.5 text-[#0f766e]" />
-              <span className="text-[11px]">Keyboards</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                onSelectView?.("catalog");
-                onSelectCategory?.("audio");
-              }}
-              className="flex items-center gap-2 rounded-lg border border-[#e8ece9] bg-white p-2 text-left text-[#727b76] transition-colors hover:text-[#202522]"
-            >
-              <Headphones className="size-3.5 text-[#0f766e]" />
-              <span className="text-[11px]">Audio</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                onSelectView?.("catalog");
-                onSelectCategory?.("furniture");
-              }}
-              className="flex items-center gap-2 rounded-lg border border-[#e8ece9] bg-white p-2 text-left text-[#727b76] transition-colors hover:text-[#202522]"
-            >
-              <Armchair className="size-3.5 text-[#0f766e]" />
-              <span className="text-[11px]">Chairs</span>
-            </button>
+        <div>
+          <p className="px-2 pb-2 text-[11px] font-medium tracking-wider text-[#8a948f] uppercase">
+            Categories
+          </p>
+          <div className="space-y-0.5">
+            {CATEGORIES.map((category) => (
+              <button
+                key={category.id}
+                type="button"
+                onClick={() => onSelectCategory?.(category.id)}
+                className="flex w-full cursor-pointer items-center rounded-xl px-3 py-1.5 text-left text-xs text-[#6b7470] transition-colors hover:bg-[#f3f6f4] hover:text-[#181c1a]"
+              >
+                {category.label}
+              </button>
+            ))}
           </div>
         </div>
       </div>
 
-      {/* Bottom Profile & Cart Summary Area */}
-      <div className="flex flex-col gap-2.5 border-t border-[#e8ece9] pt-4">
-        {/* Comparison Trigger if any active */}
+      {/* Bottom Cart & Compare Actions */}
+      <div className="space-y-2 border-t border-[#eef1ef] p-4">
         {comparingProducts.length > 0 && (
           <button
             type="button"
             onClick={openCompareModal}
-            className="flex items-center justify-between rounded-xl border border-[#0f766e]/20 bg-[#eaf5f2] px-3 py-2 text-xs font-semibold text-[#0f766e] transition-colors hover:bg-[#eaf5f2]/80"
+            className="flex w-full cursor-pointer items-center justify-between rounded-xl border border-[#e8ece9] bg-white px-3.5 py-2 text-xs font-medium text-[#181c1a] transition-colors hover:border-[#0f766e]"
           >
-            <div className="flex items-center gap-2">
-              <SlidersHorizontal className="size-3.5" />
-              <span>Active Comparison</span>
-            </div>
-            <span className="rounded-full bg-[#0f766e] px-1.5 py-0.2 text-[10px] text-white">
-              {comparingProducts.length}
+            <span className="inline-flex items-center gap-2">
+              <Scale className="size-3.5 text-[#0f766e]" />
+              Compare
             </span>
+            <span className="text-[#727b76]">{comparingProducts.length}</span>
           </button>
         )}
 
-        {/* Cart Pill */}
         <button
           type="button"
-          onClick={toggleCart}
-          className="flex items-center justify-between rounded-xl border border-[#e8ece9] bg-white p-2.5 text-xs font-medium text-[#202522] shadow-xs transition-colors hover:border-[#0f766e]/30 hover:bg-[#f8faf9]"
+          onClick={openCart}
+          className="flex w-full cursor-pointer items-center justify-between rounded-xl bg-[#181c1a] px-3.5 py-2.5 text-xs font-medium text-white transition-colors hover:bg-[#0f766e]"
         >
-          <div className="flex items-center gap-2">
-            <div className="flex size-7 items-center justify-center rounded-lg bg-[#eaf5f2] text-[#0f766e]">
-              <ShoppingBag className="size-3.5" />
-            </div>
-            <div className="text-left">
-              <p className="font-semibold">Review Cart</p>
-              <p className="text-[10px] text-[#727b76]">
-                {totalItems} {totalItems === 1 ? "item" : "items"}
-              </p>
-            </div>
-          </div>
-          <span className="font-bold text-[#0f766e]">{formattedSubtotal}</span>
-        </button>
-
-        {/* User Profile */}
-        <div className="flex items-center justify-between px-2 pt-1">
-          <div className="flex items-center gap-2">
-            <div className="flex size-7 items-center justify-center rounded-full bg-[#e8ece9] text-[#727b76]">
-              <User className="size-3.5" />
-            </div>
-            <div className="flex flex-col">
-              <span className="text-xs font-semibold text-[#202522]">MongoDB · PayPal Ready</span>
-              <span className="text-[10px] text-[#727b76]">Live Catalog & Sandbox</span>
-            </div>
-          </div>
-          <span className="rounded-full bg-emerald-50 px-2 py-0.5 text-[9px] font-semibold text-emerald-700">
-            Active
+          <span className="inline-flex items-center gap-2">
+            <ShoppingBag className="size-3.5" />
+            Cart {totalItems > 0 ? `(${totalItems})` : ""}
           </span>
-        </div>
+          <span className="tabular-nums">{formattedSubtotal}</span>
+        </button>
       </div>
     </aside>
   );
