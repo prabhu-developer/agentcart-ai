@@ -4,10 +4,23 @@ export function SiteFooter() {
   return (
     <footer className="border-t border-[#eef1ef] bg-white">
       <div className="mx-auto flex max-w-6xl flex-col gap-4 px-6 py-10 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex items-center gap-3 text-xs text-[#727b76]">
+        <div className="flex flex-wrap items-center gap-3 text-xs text-[#727b76]">
           <span className="font-semibold text-[#181c1a]">AgentCart</span>
           <span>·</span>
           <span>Personal AI Shopping</span>
+          <span>·</span>
+          <span>
+            Developed by{" "}
+            <a
+              href="https://prabhu-coder.netlify.app/"
+              target="_blank"
+              rel="noopener noreferrer"
+              title="Prabhu Kannan — Senior Software Engineer"
+              className="font-medium text-[#181c1a] underline decoration-[#dce2de] underline-offset-4 transition-colors hover:text-[#0f766e] hover:decoration-[#0f766e]"
+            >
+              prabhu.coder
+            </a>
+          </span>
         </div>
 
         <nav className="flex flex-wrap items-center gap-6 text-xs text-[#6b7470]">
