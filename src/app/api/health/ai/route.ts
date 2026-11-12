@@ -1,9 +1,10 @@
-import { NextResponse } from "next/server";
+import { connection, NextResponse } from "next/server";
 
 import { createAICompletion } from "@/lib/ai/client";
 import { env } from "@/lib/env";
 
 export async function GET() {
+    await connection();
     try {
         const message = await createAICompletion([
             {

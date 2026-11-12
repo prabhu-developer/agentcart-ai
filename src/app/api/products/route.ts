@@ -1,8 +1,9 @@
-import { NextRequest, NextResponse } from "next/server";
+import { connection, NextRequest, NextResponse } from "next/server";
 import { productQuerySchema } from "@/features/products/validators/product-query";
 import { listProducts } from "@/features/products/services/product-service";
 
 export async function GET(request: NextRequest) {
+  await connection();
   try {
     const { searchParams } = new URL(request.url);
     const rawParams = Object.fromEntries(searchParams.entries());
