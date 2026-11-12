@@ -20,6 +20,8 @@ describe("Checkout Capture Integration", () => {
   let originalFetch: typeof globalThis.fetch;
   let simulatedPayPalAmount: string = "0.00";
   let simulatedStatus: string = "APPROVED";
+  let simulatedCaptureStatus: string = "COMPLETED";
+  let simulatedCaptureReason: string | undefined = undefined;
   let captureCallCount: number = 0;
 
   before(async () => {
@@ -76,7 +78,10 @@ describe("Checkout Capture Integration", () => {
                   captures: [
                     {
                       id: "MOCK-CAPTURE-ID-999",
-                      status: "COMPLETED",
+                      status: simulatedCaptureStatus,
+                      ...(simulatedCaptureReason
+                        ? { status_details: { reason: simulatedCaptureReason } }
+                        : {}),
                       amount: { currency_code: "USD", value: simulatedPayPalAmount },
                     },
                   ],
@@ -240,5 +245,50 @@ describe("Checkout Capture Integration", () => {
     // 6. Verify cart was cleared
     const cart = await getAuthoritativeCart(guestIdA);
     assert.strictEqual(cart.items.length, 0);
+  });
+
+  it("accepts PENDING_REVIEW capture status in Sandbox mode and marks order PAID", async () => {
+    await Cart.deleteOne({ guestId: guestIdA });
+    await addItemToCart(guestIdA, testProduct.id, 1);
+
+    const summary = await createCheckoutOrder(guestIdA);
+    simulatedPayPalAmount = summary.total.toFixed(2);
+    simulatedStatus = "APPROVED";
+    simulatedCaptureStatus = "PENDING";
+    simulatedCaptureReason = "PENDING_REVIEW";
+
+    const confirmed = await captureCheckoutOrder(guestIdA, summary.paypalOrderId);
+    assert.strictEqual(confirmed.orderStatus, "PAID");
+    assert.strictEqual(confirmed.paymentStatus, "CAPTURED");
+
+    simulatedCaptureStatus = "COMPLETED";
+    simulatedCaptureReason = undefined;
+  });
+
+  it("rejects DECLINED capture status and marks internal order as PAYMENT_FAILED", async () => {
+    await Cart.deleteOne({ guestId: guestIdA });
+    await addItemToCart(guestIdA, testProduct.id, 1);
+
+    const summary = await createCheckoutOrder(guestIdA);
+    simulatedPayPalAmount = summary.total.toFixed(2);
+    simulatedStatus = "APPROVED";
+    simulatedCaptureStatus = "DECLINED";
+    simulatedCaptureReason = "INSTRUMENT_DECLINED";
+
+    await assert.rejects(
+      async () => {
+        await captureCheckoutOrder(guestIdA, summary.paypalOrderId);
+      },
+      (err: Error) => {
+        return err instanceof CheckoutError && err.statusCode === 409 && err.message.includes("DECLINED");
+      }
+    );
+
+    const failedOrder = await Order.findById(summary.orderId);
+    assert.strictEqual(failedOrder?.orderStatus, "PAYMENT_FAILED");
+    assert.strictEqual(failedOrder?.paymentStatus, "FAILED");
+
+    simulatedCaptureStatus = "COMPLETED";
+    simulatedCaptureReason = undefined;
   });
 });

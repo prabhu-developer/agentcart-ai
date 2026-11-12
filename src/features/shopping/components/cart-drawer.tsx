@@ -234,15 +234,11 @@ export function CartDrawer() {
         createPortal(
           <div
             className="fixed inset-0 z-[60] flex items-center justify-center bg-black/35 p-4 backdrop-blur-xs"
-            onClick={handleCloseModal}
             role="dialog"
-          aria-modal="true"
-          aria-label={confirmedOrder ? "Order confirmed" : "Checkout"}
-        >
-          <div
-            className="relative max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-2xl border border-[#e8ece9] bg-white p-6 shadow-2xl sm:p-7"
-            onClick={(e) => e.stopPropagation()}
+            aria-modal="true"
+            aria-label={confirmedOrder ? "Order confirmed" : "Checkout"}
           >
+            <div className="relative max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-2xl border border-[#e8ece9] bg-white p-6 shadow-2xl sm:p-7">
             <button
               type="button"
               onClick={handleCloseModal}

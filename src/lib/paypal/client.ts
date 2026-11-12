@@ -46,6 +46,9 @@ export interface PayPalOrderResponse {
       captures?: Array<{
         id: string;
         status: string;
+        status_details?: {
+          reason?: string;
+        };
         amount: {
           currency_code: string;
           value: string;

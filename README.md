@@ -96,14 +96,33 @@ Follow this rapid script to evaluate AgentCart's core journey from natural langu
 
 ## 💳 PayPal Sandbox Test Credentials
 
-To test checkout in sandbox mode:
+To test checkout in sandbox mode, use either a Sandbox Buyer account or the Sandbox Debit/Credit Card below:
+
+### Option A: Sandbox Debit or Credit Card (Guest Checkout)
+
+| Field | Value |
+|---|---|
+| **Card Type** | `MASTERCARD` |
+| **Card Number** | `5385791723246805` |
+| **Expiry** | `02/2031` |
+| **CVC Code** | `Any 3 digits` (e.g. `123`) |
+
+**Test Billing / Shipping Address:**
+```text
+John Doe
+1234 Maple Street
+Springfield, IL 62704
+Phone: (217) 555-0198
+```
+
+### Option B: Sandbox Accounts
 
 | Role | Email | Password |
 |---|---|---|
 | **Sandbox Buyer** | `sb-u31bu53762535@personal.example.com` | *(Use any standard PayPal Sandbox buyer account from your Developer Dashboard)* |
 | **Sandbox Merchant** | `sb-u31bu53762535@business.example.com` | *(Configured application owner)* |
 
-*Tip: You can also use any personal sandbox buyer account generated in your [PayPal Developer Dashboard](https://developer.paypal.com/dashboard/accounts).*
+*Tip: You can generate additional test cards or personal sandbox buyer accounts in your [PayPal Developer Dashboard](https://developer.paypal.com/dashboard/accounts).*
 
 ---
 
