@@ -2,42 +2,51 @@ import Link from "next/link";
 
 export function SiteFooter() {
   return (
-    <footer className="border-t border-[#eef1ef] bg-white">
-      <div className="mx-auto flex max-w-6xl flex-col gap-4 px-6 py-10 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex flex-wrap items-center gap-3 text-xs text-[#727b76]">
-          <span className="font-semibold text-[#181c1a]">AgentCart</span>
-          <span>·</span>
-          <span>Personal AI Shopping</span>
-          <span>·</span>
-          <span>
-            Developed by{" "}
-            <a
-              href="https://prabhu-coder.netlify.app/"
-              target="_blank"
-              rel="noopener noreferrer"
-              title="Prabhu Kannan — Senior Software Engineer"
-              className="font-medium text-[#181c1a] underline decoration-[#dce2de] underline-offset-4 transition-colors hover:text-[#0f766e] hover:decoration-[#0f766e]"
+    <footer className="border-t border-[#e5e9e7] bg-white">
+      <div className="mx-auto max-w-6xl px-6 py-10">
+        <div className="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
+          {/* Brand + tagline */}
+          <div className="flex flex-col gap-1">
+            <span className="text-sm font-semibold tracking-tight text-[#111817]">
+              AgentCart
+            </span>
+            <span className="text-xs text-[#7a8580]">
+              AI-powered · PayPal Sandbox
+            </span>
+          </div>
+
+          {/* Nav links */}
+          <nav className="flex flex-wrap items-center gap-6 text-xs text-[#7a8580]">
+            <Link
+              href="/shop"
+              className="transition-colors hover:text-[#0a5c55]"
             >
-              prabhu.coder
+              Assistant
+            </Link>
+            <a
+              href="#setups"
+              className="transition-colors hover:text-[#0a5c55]"
+            >
+              Setups
             </a>
-          </span>
+            <span className="text-[#e5e9e7]">·</span>
+            <span className="text-[#7a8580]">PayPal Sandbox</span>
+          </nav>
         </div>
 
-        <nav className="flex flex-wrap items-center gap-6 text-xs text-[#6b7470]">
-          <Link href="/shop" className="transition-colors hover:text-[#181c1a]">
-            Assistant
-          </Link>
-          <Link
-            href="/shop?category=all"
-            className="transition-colors hover:text-[#181c1a]"
+        {/* Developer credit */}
+        <div className="mt-8 border-t border-[#f4f6f5] pt-6 text-xs text-[#7a8580]">
+          Developed by{" "}
+          <a
+            href="https://prabhu-coder.netlify.app/"
+            target="_blank"
+            rel="noopener noreferrer"
+            title="Prabhu Kannan — Senior Software Engineer"
+            className="font-medium text-[#374040] underline decoration-[#e5e9e7] underline-offset-4 transition-colors hover:text-[#0a5c55] hover:decoration-[#0a5c55]"
           >
-            Catalog
-          </Link>
-          <a href="#setups" className="transition-colors hover:text-[#181c1a]">
-            Setups
+            prabhu.coder
           </a>
-          <span className="text-[#9ca5a0]">PayPal Sandbox</span>
-        </nav>
+        </div>
       </div>
     </footer>
   );

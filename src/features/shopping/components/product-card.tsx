@@ -2,7 +2,7 @@
 
 import { useShoppingCart } from "@/features/shopping/context/cart-context";
 import { Product } from "@/features/shopping/types";
-import { Check, Plus, Scale } from "lucide-react";
+import { Check, Plus, Scale, Star } from "lucide-react";
 import Image from "next/image";
 import { useState } from "react";
 
@@ -32,8 +32,9 @@ export function ProductCard({ product }: ProductCardProps) {
   };
 
   return (
-    <article className="group flex flex-col overflow-hidden rounded-2xl border border-[#e8ece9] bg-white transition-all duration-200 hover:border-[#cfd8d3] hover:shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
-      <div className="relative aspect-[4/3] w-full overflow-hidden bg-[#f8faf9]">
+    <article className="group flex flex-col overflow-hidden rounded-2xl border border-[#e5e9e7] bg-white transition-all duration-200 hover:border-[#cfd8d3] hover:shadow-[0_8px_28px_rgb(0,0,0,0.07)]">
+      {/* Image area */}
+      <div className="relative aspect-[4/3] w-full overflow-hidden bg-[#f4f6f5]">
         <button
           type="button"
           onClick={() => openProductDetails(product)}
@@ -50,48 +51,65 @@ export function ProductCard({ product }: ProductCardProps) {
               className="object-cover transition-transform duration-500 ease-out group-hover:scale-[1.03]"
             />
           ) : (
-            <div className="flex size-full items-center justify-center text-xs text-[#8a948f]">
+            <div className="flex size-full items-center justify-center text-xs text-[#7a8580]">
               No image
             </div>
           )}
         </button>
 
+        {/* Out of stock badge */}
         {!product.inStock && (
-          <span className="pointer-events-none absolute top-3 left-3 rounded-full bg-white/95 px-2.5 py-1 text-[11px] font-medium text-[#6b7470] shadow-xs backdrop-blur-xs">
+          <span className="pointer-events-none absolute top-3 left-3 rounded-md bg-white/90 px-2.5 py-1 text-[11px] font-medium text-[#374040] shadow-xs backdrop-blur-sm">
             Out of stock
           </span>
         )}
 
+        {/* Compare button — always visible when active, only on hover otherwise */}
         <button
           type="button"
           onClick={handleToggleCompare}
           aria-label={inCompare ? `Remove ${product.name} from compare` : `Compare ${product.name}`}
           title={inCompare ? "Remove from compare" : "Compare"}
-          className={`absolute top-3 right-3 flex size-8 cursor-pointer items-center justify-center rounded-full border transition-all duration-150 ${inCompare
-            ? "border-[#0f766e] bg-[#0f766e] text-white shadow-xs"
-            : "border-[#e8ece9] bg-white/90 text-[#6b7470] opacity-90 backdrop-blur-xs hover:border-[#0f766e] hover:text-[#0f766e] group-hover:opacity-100"
-            }`}
+          className={`absolute top-3 right-3 flex size-8 cursor-pointer items-center justify-center rounded-full border transition-all duration-150 ${
+            inCompare
+              ? "border-[#0a5c55] bg-[#0a5c55] text-white shadow-sm"
+              : "border-[#e5e9e7] bg-white/90 text-[#7a8580] opacity-0 backdrop-blur-sm hover:border-[#0a5c55] hover:text-[#0a5c55] group-hover:opacity-100"
+          }`}
         >
           <Scale className="size-3.5" />
         </button>
       </div>
 
-      <div className="flex flex-1 flex-col justify-between gap-3 p-4">
+      {/* Body */}
+      <div className="flex flex-1 flex-col justify-between gap-3 p-4 pt-3">
         <div className="space-y-1">
-          <p className="text-[11px] font-medium tracking-wider text-[#727b76] uppercase">
+          <p className="text-[10px] tracking-[0.12em] uppercase font-semibold text-[#7a8580]">
             {product.brand}
           </p>
           <button
             type="button"
             onClick={() => openProductDetails(product)}
-            className="line-clamp-2 cursor-pointer text-left text-[15px] leading-snug font-medium text-[#181c1a] transition-colors hover:text-[#0f766e]"
+            className="line-clamp-2 cursor-pointer text-left text-[14px] font-medium leading-snug text-[#111817] transition-colors hover:text-[#0a5c55]"
           >
             {product.name}
           </button>
+
+          {/* Rating */}
+          {product.rating > 0 && (
+            <div className="flex items-center gap-1 pt-0.5">
+              <Star className="size-3 fill-amber-400 text-amber-400" />
+              <span className="text-[11px] tabular-nums text-[#7a8580]">
+                {product.rating.toFixed(1)}
+                {product.reviewCount > 0 && (
+                  <span className="ml-0.5">({product.reviewCount})</span>
+                )}
+              </span>
+            </div>
+          )}
         </div>
 
         <div className="flex items-center justify-between gap-2 pt-1">
-          <span className="text-[15px] font-semibold tabular-nums text-[#181c1a]">
+          <span className="text-[15px] font-bold tabular-nums text-[#111817]">
             ${product.price.toFixed(2)}
           </span>
 
@@ -99,10 +117,11 @@ export function ProductCard({ product }: ProductCardProps) {
             type="button"
             disabled={!product.inStock}
             onClick={handleAdd}
-            className={`inline-flex h-8 cursor-pointer items-center gap-1 rounded-full px-3.5 text-xs font-medium transition-all disabled:cursor-not-allowed disabled:opacity-40 ${justAdded || inCart
-              ? "border border-[#0f766e]/25 bg-[#eaf5f2] text-[#0f766e]"
-              : "border border-[#dce2de] bg-white text-[#181c1a] hover:border-[#0f766e] hover:bg-[#0f766e] hover:text-white"
-              }`}
+            className={`inline-flex h-8 cursor-pointer items-center gap-1 rounded-full px-3.5 text-xs font-medium transition-all duration-150 disabled:cursor-not-allowed disabled:opacity-40 ${
+              justAdded || inCart
+                ? "border border-[#0a5c55]/25 bg-[#edf7f5] text-[#0a5c55]"
+                : "border border-[#e5e9e7] bg-white text-[#111817] hover:border-[#0a5c55] hover:bg-[#0a5c55] hover:text-white"
+            }`}
           >
             {justAdded ? (
               <>

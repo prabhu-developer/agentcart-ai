@@ -1,10 +1,9 @@
 "use client";
 
-import React from "react";
-import Image from "next/image";
 import { Minus, Plus, Trash2 } from "lucide-react";
-import { CartItem as CartItemType } from "../types";
+import Image from "next/image";
 import { useShoppingCart } from "../context/cart-context";
+import { CartItem as CartItemType } from "../types";
 
 interface CartItemProps {
   item: CartItemType;
@@ -16,8 +15,8 @@ export function CartItemRow({ item }: CartItemProps) {
   const lineTotal = (product.price * quantity).toFixed(2);
 
   return (
-    <div className="flex items-center gap-3.5 border-b border-[#e8ece9] py-3.5 first:pt-1 last:border-b-0">
-      <div className="relative size-16 shrink-0 overflow-hidden rounded-lg border border-[#e8ece9] bg-[#f8faf9]">
+    <div className="flex items-center gap-3.5 border-b border-[#e5e9e7] py-3.5 first:pt-1 last:border-b-0">
+      <div className="relative size-16 shrink-0 overflow-hidden rounded-xl border border-[#e5e9e7] bg-[#f4f6f5]">
         <Image
           src={product.images[0]}
           alt={product.name}
@@ -30,40 +29,40 @@ export function CartItemRow({ item }: CartItemProps) {
       <div className="flex flex-1 flex-col justify-between overflow-hidden">
         <div className="flex items-start justify-between gap-2">
           <div className="min-w-0">
-            <p className="text-xs font-medium uppercase tracking-wider text-[#727b76]">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-[#7a8580]">
               {product.brand}
             </p>
-            <h4 className="truncate text-sm font-medium text-[#202522]">
+            <h4 className="truncate text-sm font-medium text-[#111817]">
               {product.name}
             </h4>
           </div>
           <button
             type="button"
             onClick={() => removeFromCart(product.id)}
-            className="text-[#727b76] transition-colors hover:text-rose-600"
+            className="cursor-pointer text-[#9ca5a0] transition-colors hover:text-rose-600"
             aria-label={`Remove ${product.name} from cart`}
           >
-            <Trash2 className="size-4" />
+            <Trash2 className="size-3.5" />
           </button>
         </div>
 
         <div className="mt-2.5 flex items-center justify-between">
-          <div className="flex items-center rounded-md border border-[#e8ece9] bg-[#f8faf9]">
+          <div className="flex items-center rounded-full border border-[#e5e9e7] bg-[#fafafa]">
             <button
               type="button"
               onClick={() => updateQuantity(product.id, quantity - 1)}
-              className="flex size-7 items-center justify-center text-[#727b76] transition-colors hover:bg-white hover:text-[#202522]"
+              className="flex size-6.5 cursor-pointer items-center justify-center rounded-full text-[#7a8580] transition-colors hover:bg-white hover:text-[#111817]"
               aria-label="Decrease quantity"
             >
               <Minus className="size-3" />
             </button>
-            <span className="w-8 text-center text-xs font-semibold text-[#202522]">
+            <span className="w-7 text-center text-xs font-semibold tabular-nums text-[#111817]">
               {quantity}
             </span>
             <button
               type="button"
               onClick={() => updateQuantity(product.id, quantity + 1)}
-              className="flex size-7 items-center justify-center text-[#727b76] transition-colors hover:bg-white hover:text-[#202522]"
+              className="flex size-6.5 cursor-pointer items-center justify-center rounded-full text-[#7a8580] transition-colors hover:bg-white hover:text-[#111817]"
               aria-label="Increase quantity"
             >
               <Plus className="size-3" />
@@ -71,8 +70,12 @@ export function CartItemRow({ item }: CartItemProps) {
           </div>
 
           <div className="text-right">
-            <span className="text-xs text-[#727b76]">${product.price.toFixed(2)} ea</span>
-            <p className="text-sm font-semibold text-[#202522]">${lineTotal}</p>
+            <span className="text-[11px] text-[#7a8580]">
+              ${product.price.toFixed(2)} ea
+            </span>
+            <p className="text-sm font-bold tabular-nums text-[#111817]">
+              ${lineTotal}
+            </p>
           </div>
         </div>
       </div>

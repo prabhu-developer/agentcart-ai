@@ -1,7 +1,7 @@
 "use client";
 
-import { useRef, useState } from "react";
 import { ArrowUp } from "lucide-react";
+import { useRef, useState } from "react";
 
 interface ChatComposerProps {
   onSendMessage: (message: string) => void;
@@ -45,7 +45,7 @@ export function ChatComposer({
 
   return (
     <div className="mx-auto w-full max-w-3xl">
-      <div className="flex items-end gap-2 rounded-2xl border border-[#e3e8e5] bg-white px-4 py-2.5 shadow-[0_2px_16px_rgb(0,0,0,0.03)] transition-colors focus-within:border-[#0f766e]/50">
+      <div className="flex items-end gap-2.5 rounded-2xl border border-[#e5e9e7] bg-white px-4 py-2.5 shadow-[0_2px_16px_rgb(0,0,0,0.04)] transition-all duration-200 focus-within:border-[#0a5c55]/40 focus-within:shadow-[0_4px_20px_rgb(10,92,85,0.08)]">
         <textarea
           ref={textareaRef}
           rows={1}
@@ -55,18 +55,20 @@ export function ChatComposer({
           disabled={isLoading}
           placeholder={placeholder}
           aria-label="Ask AgentCart"
-          className="max-h-[140px] flex-1 resize-none bg-transparent py-1 text-sm text-[#181c1a] placeholder:text-[#8a948f] focus:outline-none disabled:opacity-60"
+          className="max-h-35 flex-1 resize-none bg-transparent py-1 text-[15px] text-[#111817] placeholder:text-[#9ca5a0] focus:outline-none disabled:opacity-60"
         />
 
-        <button
-          type="button"
-          onClick={submit}
-          disabled={isLoading || !value.trim()}
-          aria-label="Send message"
-          className="flex size-8 shrink-0 cursor-pointer items-center justify-center rounded-full bg-[#0f766e] text-white transition-colors hover:bg-[#0d655e] disabled:cursor-not-allowed disabled:bg-[#dce2de] disabled:text-[#8a948f]"
-        >
-          <ArrowUp className="size-4" />
-        </button>
+        <div className="flex shrink-0 items-center gap-1.5 pb-0.5">
+          <button
+            type="button"
+            onClick={submit}
+            disabled={isLoading || !value.trim()}
+            aria-label="Send inquiry"
+            className="flex size-8.5 shrink-0 cursor-pointer items-center justify-center rounded-full bg-[#0a5c55] text-white transition-all hover:bg-[#084f49] disabled:cursor-not-allowed disabled:bg-[#f0f3f1] disabled:text-[#b0b8b4]"
+          >
+            <ArrowUp className="size-4" />
+          </button>
+        </div>
       </div>
     </div>
   );

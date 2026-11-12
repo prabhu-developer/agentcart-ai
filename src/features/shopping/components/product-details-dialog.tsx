@@ -81,21 +81,21 @@ function ProductDetailsContent({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 p-4 backdrop-blur-xs"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 backdrop-blur-sm"
       onClick={onClose}
       role="dialog"
       aria-modal="true"
       aria-label={product.name}
     >
       <div
-        className="relative max-h-[88vh] w-full max-w-3xl overflow-y-auto rounded-2xl border border-[#e8ece9] bg-white shadow-2xl"
+        className="relative max-h-[88vh] w-full max-w-3xl overflow-y-auto rounded-2xl border border-[#e5e9e7] bg-white shadow-2xl"
         onClick={(e) => e.stopPropagation()}
       >
         <button
           type="button"
           onClick={onClose}
           aria-label="Close product details"
-          className="absolute top-4 right-4 z-10 flex size-8 cursor-pointer items-center justify-center rounded-full border border-[#e8ece9] bg-white/95 text-[#6b7470] transition-colors hover:text-[#181c1a]"
+          className="absolute top-4 right-4 z-10 flex size-8 cursor-pointer items-center justify-center rounded-full border border-[#e5e9e7] bg-white/95 text-[#7a8580] transition-colors hover:text-[#111817]"
         >
           <X className="size-4" />
         </button>
@@ -103,7 +103,7 @@ function ProductDetailsContent({
         <div className="grid grid-cols-1 gap-6 p-6 md:grid-cols-2 md:gap-8 md:p-8">
           {/* Image Gallery */}
           <div className="space-y-3">
-            <div className="relative aspect-square w-full overflow-hidden rounded-xl bg-[#f8faf9]">
+            <div className="relative aspect-square w-full overflow-hidden rounded-2xl border border-[#e5e9e7] bg-[#f4f6f5]">
               {images[selectedIndex] ? (
                 <Image
                   src={images[selectedIndex]}
@@ -114,7 +114,7 @@ function ProductDetailsContent({
                   className="object-cover"
                 />
               ) : (
-                <div className="flex size-full items-center justify-center text-xs text-[#8a948f]">
+                <div className="flex size-full items-center justify-center text-xs text-[#7a8580]">
                   No image available
                 </div>
               )}
@@ -127,10 +127,11 @@ function ProductDetailsContent({
                     key={src + idx}
                     type="button"
                     onClick={() => setSelectedIndex(idx)}
-                    className={`relative size-14 cursor-pointer overflow-hidden rounded-lg border transition-all ${selectedIndex === idx
-                      ? "border-[#0f766e] ring-1 ring-[#0f766e]"
-                      : "border-[#e8ece9] opacity-70 hover:opacity-100"
-                      }`}
+                    className={`relative size-14 cursor-pointer overflow-hidden rounded-xl border transition-all ${
+                      selectedIndex === idx
+                        ? "border-[#0a5c55] ring-1 ring-[#0a5c55]"
+                        : "border-[#e5e9e7] opacity-70 hover:opacity-100"
+                    }`}
                   >
                     <Image
                       src={src}
@@ -150,29 +151,35 @@ function ProductDetailsContent({
           <div className="flex flex-col justify-between gap-6">
             <div className="space-y-4">
               <div className="space-y-1.5 pr-6">
-                <p className="text-[11px] font-medium tracking-wider text-[#727b76] uppercase">
+                <p className="text-[10px] font-semibold tracking-[0.14em] text-[#7a8580] uppercase">
                   {product.brand} · {product.category}
                 </p>
-                <h2 className="text-xl leading-snug font-semibold text-[#181c1a]">
+                <h2 className="text-xl sm:text-2xl leading-snug font-bold text-[#111817]">
                   {product.name}
                 </h2>
-                <div className="flex items-center gap-3 pt-0.5 text-xs text-[#6b7470]">
-                  <span className="inline-flex items-center gap-1 font-medium text-[#181c1a]">
-                    <Star className="size-3.5 fill-[#0f766e] text-[#0f766e]" />
+                <div className="flex items-center gap-3 pt-0.5 text-xs text-[#7a8580]">
+                  <span className="inline-flex items-center gap-1 font-semibold text-[#111817]">
+                    <Star className="size-3.5 fill-amber-400 text-amber-400" />
                     {product.rating.toFixed(1)}
                   </span>
                   <span>·</span>
-                  <span className={product.inStock ? "text-[#0f766e]" : "text-[#6b7470]"}>
+                  <span
+                    className={
+                      product.inStock
+                        ? "font-semibold text-[#0a5c55]"
+                        : "text-[#7a8580]"
+                    }
+                  >
                     {product.inStock ? "In stock" : "Out of stock"}
                   </span>
                 </div>
               </div>
 
-              <div className="text-2xl font-semibold tabular-nums text-[#181c1a]">
+              <div className="text-3xl font-bold tabular-nums text-[#111817]">
                 ${product.price.toFixed(2)}
               </div>
 
-              <p className="text-sm leading-relaxed text-[#6b7470]">
+              <p className="text-sm leading-relaxed text-[#525b56]">
                 {product.description}
               </p>
 
@@ -181,7 +188,7 @@ function ProductDetailsContent({
                   {highlights.map((item) => (
                     <span
                       key={item}
-                      className="rounded-full bg-[#f8faf9] px-2.5 py-1 text-xs text-[#4b544f]"
+                      className="rounded-full border border-[#e5e9e7] bg-[#fafafa] px-3 py-1 text-xs font-medium text-[#374040]"
                     >
                       {item}
                     </span>
@@ -190,14 +197,16 @@ function ProductDetailsContent({
               )}
 
               {specEntries.length > 0 && (
-                <div className="divide-y divide-[#eef1ef] border-t border-[#eef1ef] pt-2">
+                <div className="divide-y divide-[#e5e9e7] border-t border-[#e5e9e7] pt-2">
                   {specEntries.map(([key, val]) => (
                     <div
                       key={key}
                       className="flex items-baseline justify-between gap-4 py-2 text-xs"
                     >
-                      <span className="text-[#727b76]">{key}</span>
-                      <span className="text-right font-medium text-[#181c1a]">{val}</span>
+                      <span className="text-[#7a8580]">{key}</span>
+                      <span className="text-right font-medium text-[#111817]">
+                        {val}
+                      </span>
                     </div>
                   ))}
                 </div>
@@ -209,12 +218,12 @@ function ProductDetailsContent({
                 type="button"
                 disabled={!product.inStock}
                 onClick={onAddToCart}
-                className="inline-flex h-10 flex-1 cursor-pointer items-center justify-center gap-1.5 rounded-full bg-[#0f766e] px-5 text-sm font-medium text-white transition-colors hover:bg-[#0d655e] disabled:cursor-not-allowed disabled:opacity-40"
+                className="inline-flex h-11 flex-1 cursor-pointer items-center justify-center gap-1.5 rounded-full bg-[#0a5c55] px-5 text-sm font-semibold text-white transition-all hover:bg-[#084f49] disabled:cursor-not-allowed disabled:opacity-40 shadow-xs"
               >
                 {inCart ? (
                   <>
                     <Check className="size-4" />
-                    <span>Add another</span>
+                    <span>In cart</span>
                   </>
                 ) : (
                   <>
@@ -227,10 +236,11 @@ function ProductDetailsContent({
               <button
                 type="button"
                 onClick={onToggleCompare}
-                className={`inline-flex h-10 cursor-pointer items-center gap-1.5 rounded-full border px-4 text-sm font-medium transition-colors ${inCompare
-                  ? "border-[#0f766e] bg-[#eaf5f2] text-[#0f766e]"
-                  : "border-[#e8ece9] bg-white text-[#181c1a] hover:border-[#cfd8d3]"
-                  }`}
+                className={`inline-flex h-11 cursor-pointer items-center gap-1.5 rounded-full border px-4.5 text-sm font-medium transition-all ${
+                  inCompare
+                    ? "border-[#0a5c55] bg-[#edf7f5] text-[#0a5c55]"
+                    : "border-[#e5e9e7] bg-white text-[#111817] hover:border-[#0a5c55] hover:text-[#0a5c55]"
+                }`}
               >
                 <Scale className="size-4" />
                 <span>{inCompare ? "Comparing" : "Compare"}</span>

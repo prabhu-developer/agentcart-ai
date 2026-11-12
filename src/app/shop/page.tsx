@@ -12,12 +12,14 @@ export const metadata: Metadata = {
 
 function WorkspaceFallback() {
   return (
-    <div className="flex h-[calc(100vh-64px)] w-full items-center justify-center bg-white text-[#727b76]">
+    <div className="flex h-[calc(100vh-64px)] w-full items-center justify-center bg-white text-[#7a8580]">
       <div className="flex flex-col items-center gap-3">
-        <div className="flex size-10 items-center justify-center rounded-xl bg-[#eaf5f2] text-[#0f766e]">
+        <div className="flex size-11 items-center justify-center rounded-2xl bg-[#edf7f5] text-[#0a5c55] shadow-2xs">
           <Sparkles className="size-5 animate-pulse" />
         </div>
-        <p className="text-xs font-medium">Initializing AgentCart Workspace...</p>
+        <p className="text-xs font-medium text-[#7a8580]">
+          Initializing AgentCart Workspace...
+        </p>
       </div>
     </div>
   );

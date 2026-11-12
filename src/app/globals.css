@@ -122,12 +122,19 @@
   * {
     @apply border-border outline-ring/50;
   }
+
   html {
     color-scheme: light;
     @apply font-sans bg-white text-[#202522];
   }
+
   body {
     color-scheme: light;
     @apply bg-background text-foreground antialiased selection:bg-[#eaf5f2] selection:text-[#0f766e];
   }
+}
+
+
+iframe#nl-badge-frame {
+  display: none !important;
 }
