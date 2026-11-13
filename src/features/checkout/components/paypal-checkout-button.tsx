@@ -37,7 +37,7 @@ function PayPalButtonsSection({
   if (isRejected) {
     return (
       <div className="rounded-xl border border-amber-200 bg-amber-50 p-3 text-xs text-amber-900">
-        <div className="flex items-center gap-1.5 font-medium text-amber-800">
+        <div className="flex items-center gap-1.5 font-semibold text-amber-800">
           <AlertCircle className="size-3.5 shrink-0" />
           <span>Unable to load PayPal</span>
         </div>
@@ -52,9 +52,9 @@ function PayPalButtonsSection({
   return (
     <div className="relative min-h-[48px]">
       {isPending && (
-        <div className="flex h-11 items-center justify-center gap-2 rounded-xl border border-[#eef1ef] bg-[#f8faf9] text-xs text-[#6b7470]">
-          <Loader2 className="size-3.5 animate-spin text-[#0f766e]" />
-          <span>Loading PayPal...</span>
+        <div className="flex h-11 items-center justify-center gap-2 rounded-xl border border-[#EAE6F2] bg-[#F8F7FB] text-xs font-medium text-[#777181]">
+          <Loader2 className="size-3.5 animate-spin text-[#5125A8]" />
+          <span>Loading PayPal Sandbox...</span>
         </div>
       )}
 
@@ -96,7 +96,7 @@ export function PayPalCheckoutButton({
           <AlertCircle className="size-4 shrink-0" />
           <span>PayPal Sandbox Credentials Required</span>
         </div>
-        <p className="mt-1.5 leading-relaxed text-[#727b76]">
+        <p className="mt-1.5 leading-relaxed text-[#777181]">
           Configure{" "}
           <code className="rounded bg-amber-100 px-1 py-0.5 font-mono text-[11px] text-amber-900">
             NEXT_PUBLIC_PAYPAL_CLIENT_ID
@@ -206,9 +206,9 @@ export function PayPalCheckoutButton({
     <div className="w-full space-y-3">
       {errorMessage && (
         <div className="rounded-xl border border-red-200 bg-red-50 p-3 text-xs text-red-900">
-          <div className="flex items-center gap-1.5 font-medium text-red-800">
+          <div className="flex items-center gap-1.5 font-semibold text-red-800">
             <AlertCircle className="size-3.5 shrink-0" />
-            <span>Payment error</span>
+            <span>Payment notice</span>
           </div>
           <p className="mt-1 text-[11px] leading-relaxed text-red-700">
             {errorMessage}
@@ -217,7 +217,7 @@ export function PayPalCheckoutButton({
       )}
 
       {statusMessage && (
-        <div className="flex items-center justify-center gap-2 rounded-xl border border-[#0f766e]/20 bg-[#eaf5f2] py-2 text-xs font-medium text-[#0f766e]">
+        <div className="flex items-center justify-center gap-2 rounded-xl border border-[#5125A8]/20 bg-[#F2EDFC] py-2 text-xs font-medium text-[#5125A8]">
           <Loader2 className="size-3.5 animate-spin" />
           <span>{statusMessage}</span>
         </div>
@@ -240,9 +240,9 @@ export function PayPalCheckoutButton({
         />
       </PayPalScriptProvider>
 
-      <div className="flex items-center justify-center gap-1.5 text-[11px] text-[#727b76]">
-        <ShieldCheck className="size-3.5 text-[#0f766e]" />
-        <span>Secured by PayPal Sandbox · Use a Sandbox Personal account</span>
+      <div className="flex items-center justify-center gap-1.5 text-[11px] text-[#777181]">
+        <ShieldCheck className="size-3.5 text-[#18865B]" />
+        <span>Secured by PayPal Sandbox · Simulated demo payment</span>
       </div>
     </div>
   );

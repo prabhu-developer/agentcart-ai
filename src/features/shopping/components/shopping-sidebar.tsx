@@ -2,11 +2,11 @@
 
 import Link from "next/link";
 import {
+  Columns2,
   LayoutGrid,
   MessageSquare,
   Plus,
   RotateCcw,
-  Scale,
   ShoppingBag,
 } from "lucide-react";
 import { MOCK_RECENT_SESSIONS } from "@/features/shopping/data/mock-products";
@@ -52,22 +52,23 @@ export function ShoppingSidebar({
 
   return (
     <aside
-      className={`flex flex-col border-r border-[#eef1ef] bg-[#fcfdfc] ${className}`}
+      className={`flex flex-col border-r border-[#EAE6F2] bg-white ${className}`}
     >
       {/* Brand Header */}
       <div className="flex items-center justify-between px-5 pt-5 pb-4">
         <Link
           href="/"
-          className="text-base font-semibold tracking-tight text-[#181c1a] transition-opacity hover:opacity-80"
+          className="flex items-center gap-2 text-base font-bold tracking-tight text-[#211B2E] transition-opacity hover:opacity-80"
         >
-          AgentCart
+          <span className="size-4 rounded-full agentcart-orb-sm" />
+          <span>AgentCart</span>
         </Link>
         <button
           type="button"
           onClick={onResetDemo}
           title="Reset session"
           aria-label="Reset session"
-          className="flex size-7 cursor-pointer items-center justify-center rounded-full text-[#8a948f] transition-colors hover:bg-[#f1f4f2] hover:text-[#181c1a]"
+          className="flex size-7 cursor-pointer items-center justify-center rounded-lg text-[#777181] transition-colors hover:bg-[#F8F7FB] hover:text-[#211B2E]"
         >
           <RotateCcw className="size-3.5" />
         </button>
@@ -75,30 +76,30 @@ export function ShoppingSidebar({
 
       {/* Primary View Switch */}
       <div className="px-4 pb-4">
-        <div className="grid grid-cols-2 rounded-xl bg-[#f1f4f2] p-1">
+        <div className="grid grid-cols-2 rounded-xl bg-[#F8F7FB] p-1 border border-[#EAE6F2]">
           <button
             type="button"
             onClick={() => onSelectView("chat")}
-            className={`flex cursor-pointer items-center justify-center gap-1.5 rounded-lg py-1.5 text-xs font-medium transition-all ${
+            className={`flex cursor-pointer items-center justify-center gap-1.5 rounded-lg py-1.5 text-xs font-semibold transition-all ${
               activeView === "chat"
-                ? "bg-white text-[#181c1a] shadow-xs"
-                : "text-[#6b7470] hover:text-[#181c1a]"
+                ? "bg-white text-[#211B2E] shadow-2xs"
+                : "text-[#777181] hover:text-[#211B2E]"
             }`}
           >
-            <MessageSquare className="size-3.5" />
+            <MessageSquare className="size-3.5 text-[#5125A8]" />
             <span>Assistant</span>
           </button>
 
           <button
             type="button"
             onClick={() => onSelectView("catalog")}
-            className={`flex cursor-pointer items-center justify-center gap-1.5 rounded-lg py-1.5 text-xs font-medium transition-all ${
+            className={`flex cursor-pointer items-center justify-center gap-1.5 rounded-lg py-1.5 text-xs font-semibold transition-all ${
               activeView === "catalog"
-                ? "bg-white text-[#181c1a] shadow-xs"
-                : "text-[#6b7470] hover:text-[#181c1a]"
+                ? "bg-white text-[#211B2E] shadow-2xs"
+                : "text-[#777181] hover:text-[#211B2E]"
             }`}
           >
-            <LayoutGrid className="size-3.5" />
+            <LayoutGrid className="size-3.5 text-[#777181]" />
             <span>Catalog</span>
           </button>
         </div>
@@ -106,18 +107,18 @@ export function ShoppingSidebar({
         <button
           type="button"
           onClick={onNewSession}
-          className="mt-3 flex h-9 w-full cursor-pointer items-center justify-center gap-1.5 rounded-full border border-[#e3e8e5] bg-white text-xs font-medium text-[#181c1a] transition-colors hover:border-[#0f766e] hover:text-[#0f766e]"
+          className="mt-3 flex h-9 w-full cursor-pointer items-center justify-center gap-1.5 rounded-xl border border-[#EAE6F2] bg-white text-xs font-semibold text-[#211B2E] transition-colors hover:border-[#6D45D9]/40 hover:bg-[#F2EDFC] hover:text-[#5125A8]"
         >
           <Plus className="size-3.5" />
-          <span>New search</span>
+          <span>New session</span>
         </button>
       </div>
 
       {/* Scrollable Navigation */}
       <div className="flex-1 space-y-6 overflow-y-auto px-4 py-2">
         <div>
-          <p className="px-2 pb-2 text-[11px] font-medium tracking-wider text-[#8a948f] uppercase">
-            Setups
+          <p className="px-2 pb-2 text-[11px] font-bold tracking-wider text-[#777181] uppercase">
+            Curated Setups
           </p>
           <div className="space-y-1">
             {MOCK_RECENT_SESSIONS.map((session) => {
@@ -130,8 +131,8 @@ export function ShoppingSidebar({
                   onClick={() => onSelectSession(session.id)}
                   className={`flex w-full cursor-pointer items-center justify-between rounded-xl px-3 py-2 text-left text-xs transition-colors ${
                     isActive
-                      ? "bg-[#eaf5f2] font-medium text-[#0f766e]"
-                      : "text-[#4b544f] hover:bg-[#f3f6f4] hover:text-[#181c1a]"
+                      ? "bg-[#F2EDFC] font-semibold text-[#5125A8]"
+                      : "text-[#211B2E] hover:bg-[#F8F7FB]"
                   }`}
                 >
                   <span className="truncate">{session.title}</span>
@@ -142,7 +143,7 @@ export function ShoppingSidebar({
         </div>
 
         <div>
-          <p className="px-2 pb-2 text-[11px] font-medium tracking-wider text-[#8a948f] uppercase">
+          <p className="px-2 pb-2 text-[11px] font-bold tracking-wider text-[#777181] uppercase">
             Categories
           </p>
           <div className="space-y-0.5">
@@ -151,7 +152,7 @@ export function ShoppingSidebar({
                 key={category.id}
                 type="button"
                 onClick={() => onSelectCategory?.(category.id)}
-                className="flex w-full cursor-pointer items-center rounded-xl px-3 py-1.5 text-left text-xs text-[#6b7470] transition-colors hover:bg-[#f3f6f4] hover:text-[#181c1a]"
+                className="flex w-full cursor-pointer items-center rounded-xl px-3 py-1.5 text-left text-xs font-medium text-[#777181] transition-colors hover:bg-[#F8F7FB] hover:text-[#211B2E]"
               >
                 {category.label}
               </button>
@@ -161,31 +162,31 @@ export function ShoppingSidebar({
       </div>
 
       {/* Bottom Cart & Compare Actions */}
-      <div className="space-y-2 border-t border-[#eef1ef] p-4">
+      <div className="space-y-2 border-t border-[#EAE6F2] p-4">
         {comparingProducts.length > 0 && (
           <button
             type="button"
             onClick={openCompareModal}
-            className="flex w-full cursor-pointer items-center justify-between rounded-xl border border-[#e8ece9] bg-white px-3.5 py-2 text-xs font-medium text-[#181c1a] transition-colors hover:border-[#0f766e]"
+            className="flex w-full cursor-pointer items-center justify-between rounded-xl border border-[#EAE6F2] bg-white px-3.5 py-2 text-xs font-semibold text-[#211B2E] transition-colors hover:border-[#6D45D9]/40 hover:text-[#5125A8]"
           >
             <span className="inline-flex items-center gap-2">
-              <Scale className="size-3.5 text-[#0f766e]" />
-              Compare
+              <Columns2 className="size-3.5 text-[#6D45D9]" />
+              <span>Compare</span>
             </span>
-            <span className="text-[#727b76]">{comparingProducts.length}</span>
+            <span className="text-[#777181]">{comparingProducts.length}</span>
           </button>
         )}
 
         <button
           type="button"
           onClick={openCart}
-          className="flex w-full cursor-pointer items-center justify-between rounded-xl bg-[#181c1a] px-3.5 py-2.5 text-xs font-medium text-white transition-colors hover:bg-[#0f766e]"
+          className="flex w-full cursor-pointer items-center justify-between rounded-xl bg-[#211B2E] px-3.5 py-2.5 text-xs font-semibold text-white transition-colors hover:bg-[#342C44]"
         >
           <span className="inline-flex items-center gap-2">
             <ShoppingBag className="size-3.5" />
-            Cart {totalItems > 0 ? `(${totalItems})` : ""}
+            <span>Cart {totalItems > 0 ? `(${totalItems})` : ""}</span>
           </span>
-          <span className="tabular-nums">{formattedSubtotal}</span>
+          <span className="tabular-nums font-bold">{formattedSubtotal}</span>
         </button>
       </div>
     </aside>

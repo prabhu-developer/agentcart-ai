@@ -10,7 +10,7 @@ interface ProductGridProps {
 export function ProductGrid({ products, className }: ProductGridProps) {
   if (products.length === 0) {
     return (
-      <div className="rounded-xl border border-dashed border-[#e8ece9] p-8 text-center text-xs text-[#727b76]">
+      <div className="rounded-2xl border border-dashed border-[#EAE6F2] p-8 text-center text-xs text-[#777181]">
         No products match the selected criteria.
       </div>
     );
@@ -18,7 +18,7 @@ export function ProductGrid({ products, className }: ProductGridProps) {
 
   return (
     <div
-      className={`grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 ${
+      className={`grid grid-cols-1 gap-4.5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 ${
         className || ""
       }`}
     >

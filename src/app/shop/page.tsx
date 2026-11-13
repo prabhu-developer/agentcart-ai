@@ -1,23 +1,19 @@
 import { Suspense } from "react";
 import { Metadata } from "next";
 import { ShoppingWorkspace } from "@/features/shopping/components/shopping-workspace";
-import { SiteHeader } from "@/components/layout/site-header";
-import { Sparkles } from "lucide-react";
 
 export const metadata: Metadata = {
-  title: "Shopping Assistant — AgentCart",
+  title: "Shopping Assistant — AgentCart AI",
   description:
     "AI-powered commerce workspace. Tell AgentCart what you need, compare curated options, and organize your cart.",
 };
 
 function WorkspaceFallback() {
   return (
-    <div className="flex h-[calc(100vh-64px)] w-full items-center justify-center bg-white text-[#7a8580]">
+    <div className="flex h-screen w-full items-center justify-center bg-[#F8F7FB] text-[#777181]">
       <div className="flex flex-col items-center gap-3">
-        <div className="flex size-11 items-center justify-center rounded-2xl bg-[#edf7f5] text-[#0a5c55] shadow-2xs">
-          <Sparkles className="size-5 animate-pulse" />
-        </div>
-        <p className="text-xs font-medium text-[#7a8580]">
+        <div className="size-11 rounded-full agentcart-orb animate-pulse" />
+        <p className="text-xs font-semibold text-[#777181]">
           Initializing AgentCart Workspace...
         </p>
       </div>
@@ -27,8 +23,7 @@ function WorkspaceFallback() {
 
 export default function ShopPage() {
   return (
-    <div className="flex min-h-screen flex-col bg-white">
-      <SiteHeader />
+    <div className="flex h-screen w-full flex-col overflow-hidden bg-[#F8F7FB]">
       <Suspense fallback={<WorkspaceFallback />}>
         <ShoppingWorkspace />
       </Suspense>

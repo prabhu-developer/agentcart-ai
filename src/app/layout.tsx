@@ -1,26 +1,20 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono, Inter } from "next/font/google";
+import { Inter } from "next/font/google";
 import "./globals.css";
 import { cn } from "@/lib/utils";
 import { CartProvider } from "@/features/shopping/context/cart-context";
 import { Toaster } from "@/components/ui/sonner";
 
-const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
-
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const inter = Inter({
   subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
+  variable: "--font-sans",
+  display: "swap",
 });
 
 export const metadata: Metadata = {
-  title: "AgentCart — Your AI Personal Shopping Assistant",
+  title: "AgentCart — Shopping, figured out.",
   description:
-    "Intelligent shopping assistant that understands your needs, curates products, compares options, and optimizes your budget.",
+    "Intelligent shopping assistant that finds the right products and builds a setup around your budget with verified MongoDB catalog data.",
 };
 
 export default function RootLayout({
@@ -35,14 +29,12 @@ export default function RootLayout({
       className={cn(
         "h-full",
         "antialiased",
-        geistSans.variable,
-        geistMono.variable,
         "font-sans",
         inter.variable,
-        "bg-white text-[#202522]"
+        "bg-[#F8F7FB] text-[#211B2E]"
       )}
     >
-      <body className="min-h-full flex flex-col bg-white text-[#202522]">
+      <body className="min-h-full flex flex-col bg-[#F8F7FB] text-[#211B2E]">
         <CartProvider>
           {children}
           <Toaster />
